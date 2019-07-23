@@ -1,0 +1,10 @@
+logzero
+sqlalchemy
+scrapy
+scrapyd
+scrapyd-client
+scrapy-redis
+pyquery
+lxml
+pymysql
+happybase
