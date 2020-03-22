@@ -7,7 +7,7 @@
 import XX.Encrypt.EncryptHelper as Enc
 
 
-def addHBase(spider, url, html, project_name, conn, row=None):
+def add_HBase(spider, url, html, project_name, conn, row=None):
     table = conn.connection.table("crawl_" + project_name)
     row = spider + "_" + Enc.Encrypt.md5(url) if not row else row
     if table.row(row):

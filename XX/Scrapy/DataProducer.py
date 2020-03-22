@@ -1,11 +1,6 @@
 #!/usr/bin/python3
 # -*- coding:utf-8 -*-
 # @Time       : 2018/12/2 16:10
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : DataProductor.py
-# @Des         : 
-# @Software : PyCharm
 import json
 import time
 
@@ -26,37 +21,37 @@ except ImportError as e:
 
 class DataProducer:
     @staticmethod
-    def Json2Redis(*args, **kw):
+    def json_2_redis(*args, **kw):
         pass
 
     @staticmethod
-    def Json2Kafka(*args, **kw):
+    def json_2_kafka(*args, **kw):
         pass
 
 
 class JsonFileProducer(DataProducer):
     @staticmethod
-    def Json2Redis(*args, **kw):
+    def json_2_redis(*args, **kw):
         rcfg = kw.get("rcfg")
         if not rcfg:
             print("No rcfg" + "===" * 10)
             return
         rename = kw.get("rename", 0)
-        conn_redis = dr.RedisHelper.getRedisConnectByCfg(rcfg)
+        conn_redis = dr.RedisHelper.get_redis_connect_by_cfg(rcfg)
         fp = kw.get("fp", "")
         ts = kw.get("ts", 1)
         spider = kw.get("spider")
-        if rename and str(fp).startswith(dt.GetToday().replace("-", "_")):
+        if rename and str(fp).startswith(dt.get_today().replace("-", "_")):
             return
 
         for line in open(fp, encoding="utf-8"):
             length = conn_redis.llen(spider + ":items")
             if length > 50000:
-                bf.printFromHead(fp + "\t Too much,Please customer\t" + str(length) + "\t\t")
+                bf.print_from_head(fp + "\t Too much,Please customer\t" + str(length) + "\t\t")
                 time.sleep(ts)
-            bf.printBlankEnd(conn_redis.lpush(spider + ":items", line))
+            bf.print_blank_end(conn_redis.lpush(spider + ":items", line))
         if rename:
-            uf.FileHelper.renameFile(fp, str(fp) + "1")
+            uf.FileHelper.rename_file(fp, str(fp) + "1")
         print("=====File Over\t" + fp + "=====")
         conn_redis.connection_pool.disconnect()
 
@@ -77,7 +72,7 @@ class JsonFile2HBase(JsonFileProducer):
             data = ColumnDescriptor(name='data')
             self.client.createTable(self.table_name, [source, data])
 
-    def json2Hbase(self, *args, **kwargs):
+    def json_2_hbase(self, *args, **kwargs):
         fp = kwargs.get("fp", "")
         if fp:
             for line in open(fp, encoding="utf-8"):
@@ -94,8 +89,8 @@ class JsonFile2HBase(JsonFileProducer):
             print("No fp")
 
 
-def JsonFileLine2Redis(fp, spider, rcfg, fn, rename=1, ts=10):
-    JsonFileProducer.Json2Redis(fp, spider, rcfg, fn, rename=1, ts=10)
+def json_file_line_2_redis(fp, spider, rcfg, fn, rename=1, ts=10):
+    JsonFileProducer.json_2_redis(fp, spider, rcfg, fn, rename=1, ts=10)
 
 # TODO:再抽象一层，就是把某个文件夹下的所有json添加到对应的文件夹队列中
 # def run(process_num=10, rp):

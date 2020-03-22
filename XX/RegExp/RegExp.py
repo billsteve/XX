@@ -13,34 +13,39 @@ import XX.Date.DatetimeHelper as DT
 class RegExpHelper():
 
     @staticmethod
-    def getUrlFromHtml(txt):
+    def get_url_from_html(txt):
         return re.findall("(?<=href=\").+?(?=\")|(?<=href=\').+?(?=\')", txt)
 
     @staticmethod
-    def getUrlFromText(txt):
+    def get_url_from_text(txt):
         return re.findall("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", txt)
 
     @staticmethod
-    def getIP(txt):
-        return re.findall(r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b", txt)
+    def get_ips(txt):
+        return re.findall(
+            r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b", txt)
         # return re.findall("((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))", txt)
 
     @staticmethod
-    def replaceContinuousBlank2One(txt):
+    def replace_continuous_blank_2_one(txt):
         return re.sub(' +', ' ', txt)
 
     @staticmethod
-    def getNumber(txt):
+    def get_number(txt):
         if not txt or not isinstance(txt, str):
             return
         return re.findall(r"(\d+)", txt)
 
     @staticmethod
-    def isUrl(txt):
+    def is_url(txt):
         return re.findall("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", txt)
 
     @staticmethod
-    def getDate(s):
+    def is_domain(txt):
+        return re.findall("(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", txt)
+
+    @staticmethod
+    def get_date(s):
         if not s or not isinstance(s, str):
             return ""
         p = re.compile(r'\d{4}[-|/|.]\d{1,2}[-|/|.]\d{1,2}|\d{4}年\d{1,2}月\d{1,2}[日号]|今天|\d{1,2}月\d{1,2}[日号]')
@@ -59,7 +64,7 @@ class RegExpHelper():
 
     # TODO:适应  20190202这样的情况
     @staticmethod
-    def getDateTime(s):
+    def get_date_time(s):
         if not s or not isinstance(s, str):
             return ""
         r = r"(\d{2,4}[-/年]\d{1,2}[-/月]\d{1,2}日? \d{2}:\d{2}(:\d{2})?)"
@@ -86,18 +91,5 @@ class RegExpHelper():
         return False
 
     @staticmethod
-    def getChinese(s):
+    def get_chinese(s):
         return re.sub("[A-Za-z0-9\_\{\}\$\.\:\/\"\!\%\[\]\,\。]", "", s)
-
-
-if __name__ == "__main__":
-    html = """/topic/19601641.090html"""
-    print(RegExpHelper.getNumber(html))
-    exit()
-
-    print(RegExpHelper.getDateTime(html))
-    exit()
-    url = "http://m.pcauto.com.cn/bbs/topic-7603105.html"
-    web_id = RegExpHelper.getNumber(url)
-
-    print(web_id)

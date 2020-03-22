@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time     : 2018/12/17 10:48
-# @Email     : billsteve@126.com
-# @Des       : 
-# @File        : MysqlPipeline
-# @Software: PyCharm
 # 放到MySQL数据库
 
 

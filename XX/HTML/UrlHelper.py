@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time     : 2018/8/16 18:11
-# @Author   : Peter
-# @Des       : 
-# @File        : UrlHelper
-# @Software: PyCharm
 import urllib.parse as parse
+from urllib.parse import urlparse
 
-import XX.Dict.DictHelper as hdict
-import XX.RegExp.RegExp as RE
+import XX.Dict.DictHelper as h_dict
+import XX.RegExp.RegExp as Re
 from tld import parse_tld, get_tld
 
 
@@ -16,45 +12,45 @@ class UrlHelper():
 
     # 检验是否是一个合法URL
     @staticmethod
-    def checkUrl(url):
-        if RE.RegExpHelper.isUrl(url):
+    def check_url(url):
+        if Re.RegExpHelper.is_url(url):
+            return 1
+
+    @staticmethod
+    def check_domain(url):
+        if Re.RegExpHelper.is_domain(url):
             return 1
 
     # 是否有参数列表
     @staticmethod
-    def hasParams(url):
+    def has_params(url):
         return
 
     # 获取域名
     @staticmethod
-    def getDomain(url):
-        url = UrlHelper.addSchema(url)
-        try:
-            from tld import get_tld
-            res = get_tld(url, as_object=True)
-            return res.fld
-        except Exception as e:
-            raise e
+    def get_domain(url):
+        url = UrlHelper.add_schema(url)
+        return urlparse(url).hostname
 
     # 获取协议
     @staticmethod
-    def getProtocol(url):
+    def get_protocol(url):
         protocol = url.split(":")[0]
         if protocol.startswith("http"):
             return protocol
 
     # 删除参数:保留协议和基本网址
     @staticmethod
-    def getWithoutParams(url):
+    def get_without_params(url):
         if not url:
             return ""
-        url = url.split(UrlHelper.getDomain(url))[0] + UrlHelper.getDomain(url)
+        url = url.split(UrlHelper.get_domain(url))[0] + UrlHelper.get_domain(url)
         return url if not url.endswith("/") else url[:-1]
         # return url.split("#")[0].split("?")[0]
 
     # 获取参数列表
     @staticmethod
-    def getParams(url):
+    def get_params(url):
         res = {}
         try:
             values = url.split('?')[-1]
@@ -70,7 +66,7 @@ class UrlHelper():
 
     # 添加参数
     @staticmethod
-    def setParams(url, params):
+    def set_params(url, params):
         if not str(url).endswith("?"):
             url = url + "?"
         for k, v in dict(params).items():
@@ -80,36 +76,39 @@ class UrlHelper():
 
     # 添加参数
     @staticmethod
-    def addParams(url, d):
-        params = UrlHelper.getParams(url.split("#")[0])
-        main_url = UrlHelper.getWithoutParams(url)
+    def add_params(url, d):
+        params = UrlHelper.get_params(url.split("#")[0])
+        main_url = UrlHelper.get_without_params(url)
         params = dict(params, **d)
-        d = hdict.DictHelper.sortedDictKey(params)
+        d = h_dict.DictHelper.sortedDictKey(params)
         params_str = ""
         for k, v in d.items():
             params_str += "&" + str(k) + "=" + str(v)
         return main_url + "?" + params_str.lstrip("&")
 
+    # url解码
     @staticmethod
-    def urlDecode(k):
+    def url_decode(k):
         return parse.unquote(str(k))
 
+    # URL编码
     @staticmethod
-    def urlEncode(k):
+    def url_encode(k):
         return parse.quote(str(k))
 
+    # 解析dict
     @staticmethod
-    def parseDict(item):
+    def parse_dict(item):
         for k in item:
             if isinstance(item[k], str):
-                item[k] = UrlHelper.urlDecode(item[k])
+                item[k] = UrlHelper.url_decode(item[k])
             elif isinstance(item[k], dict):
-                item[k] = UrlHelper.parseDict(item[k])
+                item[k] = UrlHelper.parse_dict(item[k])
         return item
 
     # 从url中获取参数列表
     @staticmethod
-    def formatUrlToDict(url):
+    def format_url_to_dict(url):
         res = {}
         try:
             values = url.split('?')[-1]
@@ -124,8 +123,8 @@ class UrlHelper():
 
     # 获取域名属于几级域名
     @staticmethod
-    def getUrlLevel(url):
-        url = UrlHelper.addSchema(url)
+    def get_url_level(url):
+        url = UrlHelper.add_schema(url)
         if parse_tld(url)[2] == "" or parse_tld(url)[2] == "www":
             return 1
         elif parse_tld(url)[2]:
@@ -134,14 +133,14 @@ class UrlHelper():
             return 0
 
     @staticmethod
-    def getTopLevelUrl(url):
-        lurl = parse_tld(UrlHelper.addSchema(url))
+    def get_top_level_url(url):
+        lurl = parse_tld(UrlHelper.add_schema(url))
         return lurl[1] + "." + lurl[0]
 
     # 域名的所有部分
     @staticmethod
-    def getMainUrl(url):
-        url = UrlHelper.getAbsoluteUrl(url)
+    def get_main_url(url):
+        url = UrlHelper.get_absolute_url(url)
         if url:
             lurl = parse_tld(url)
             if lurl[2] and len(lurl[2]):
@@ -155,11 +154,11 @@ class UrlHelper():
                 return lurl[0]
 
     @staticmethod
-    def getScheme(url):
+    def get_scheme(url):
         return get_tld(url, as_object=True).parsed_url.scheme
 
     @staticmethod
-    def getAbsoluteUrl(url, main_url=""):
+    def get_absolute_url(url, main_url=""):
         if url.startswith("#") or url.find("javascript") >= 0 or url.startswith("mailto"):
             return ""
         if url.startswith("/"):
@@ -169,36 +168,16 @@ class UrlHelper():
         return url
 
     @staticmethod
-    def getRelativelUrl(url_source, url_new):
-        if UrlHelper.getAbsoluteUrl(url_new, url_source):
+    def get_relative_url(url_source, url_new):
+        if UrlHelper.get_absolute_url(url_new, url_source):
             return parse.urljoin(url_source, url_new)
 
     @staticmethod
-    def addSchema(url, schema="http://"):
+    def add_schema(url, schema="http://"):
         return url if url.startswith("http://") or url.startswith("https://") else "http://" + url
 
 
-if __name__ == "__main__":
-    url = "https://www.intel.cn/content/www/cn/zh/communications/sds-ubs-coho-data-case-study.html"
-    print(UrlHelper.getWithoutParams(url))
-    # print(url.split(UrlHelper.getDomain(url))[0]+UrlHelper.getDomain(url))
-    exit()
-    url = "https://m.weibo.cn/api/container/getIndex?containerid=100103type%3D3%26q%3D%E6%9C%AC%E7%94%B0%26t%3D0&page_type=searchall&page=1"
-    url = "http://db.auto.sina.com.cn/2701"
-    domain = UrlHelper.getMainUrl(url)
-    domain = ".".join(domain.split(".")[::-1])
-    print(domain)
-    exit()
-    import pprint
-
-    url = "https://w2.www1.sxmty.com"
-    print(UrlHelper.getMainUrl(url))
-    exit()
-    p = UrlHelper.getParams(url)
-    print(p)
-    exit()
-    p["f"] = "8888"
-    pprint.pprint(UrlHelper.setParams("https://www.baidu.com/s", p))
-    # url = str(url).strip("http://").strip("https://").split("/")[0]
-    # print(url.strip("/"))
-    # print(UrlHelper.getScheme(url) + "://" + UrlHelper.getMainUrl(url))
+if __name__ == '__main__':
+    u = UrlHelper()
+    d = u.get_domain("http://localjhost.com:9100/")
+    print(d)

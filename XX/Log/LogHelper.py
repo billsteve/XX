@@ -2,7 +2,7 @@
 import XX.File.FileHelper as cf
 
 
-def logFile(file_path, content, method="a"):
+def log_file(file_path, content, method="a"):
     try:
         return cf.FileHelper.saveFile(file_path, content, method)
     except:

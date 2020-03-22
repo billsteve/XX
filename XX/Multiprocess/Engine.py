@@ -8,7 +8,7 @@
 import XX.Multiprocess.Callback as cb
 
 
-def applyAsycnFunction(pro_num, fun, para=None, error_callback=cb.msg):
+def apply_async_function(pro_num, fun, para=None, error_callback=cb.msg):
     from multiprocessing import Pool
     pool = Pool(pro_num)
     for i in range(pro_num):

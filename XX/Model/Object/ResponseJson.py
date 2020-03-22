@@ -14,20 +14,20 @@ class ResponseJson(object):
         self.msg = msg
 
     @staticmethod
-    def getResponseJson(data=None, code=0, msg="", resformat="dict", status="ok", *arg, **kw):
+    def get_response_json(data=None, code=0, msg="", resformat="dict", status="ok", *arg, **kw):
         if not msg:
             if code == 0:
                 msg = "ok"
             else:
                 msg = "err"
 
-        responseJson = {"data": data, "code": code, "msg": msg}
+        response_json = {"data": data, "code": code, "msg": msg}
         if resformat == "dict":
-            return responseJson
+            return response_json
         elif resformat == "str":
-            return json.dumps(responseJson, ensure_ascii=False)
+            return json.dumps(response_json, ensure_ascii=False)
         else:
-            return responseJson
+            return response_json
 
 
 if __name__ == "__main__":

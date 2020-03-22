@@ -16,6 +16,7 @@ class ResponseObj(ScrapyResponse):
     method = None
     msg = ""
     cache = 0
+    cache_file = None
     data = {}
     cookies = {}
     encoding = "UTF-8"
@@ -36,6 +37,7 @@ class ResponseObj(ScrapyResponse):
         self.method = kw.get("method")
         self.msg = kw.get("msg")
         self.cache = kw.get("cache")
+        self.cache_file = kw.get("cache_file")
         self.data = kw.get("data")
         self.cookies = kw.get("cookies")
         self.encoding = kw.get("encoding")

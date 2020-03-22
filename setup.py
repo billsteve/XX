@@ -1,21 +1,13 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time       : 2019/1/3 22:04
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : setup.py
-# @Des         : 
-# @Software : PyCharm
-import time
 from setuptools import setup, find_packages
 
 setup(
     name="XX",
-    version=time.strftime('%Y%m%d.%H%M', time.localtime(int(time.time()))),
+    version=open("version.txt", encoding="utf-8").read(),
     description=(
-        "x's tools"
+        "Python tools for myself(billsteve@126.com)"
     ),
-    long_description="""**Just Test** 
+    long_description="""**Just Test, Just for myself!** 
     
     Not safe,not stable and will boom boom boom.
 
@@ -25,9 +17,9 @@ setup(
         -  https://open.spotify.com/album/47wyCwrChF50ZTFNOuWx99  
         -  https://open.spotify.com/track/3oDFtOhcN08qeDPAK6MEQG  
     """,
-    author='billsteve',
+    author='bill steve',
     author_email='billsteve@126.com',
-    maintainer='billsteve',
+    maintainer='bill steve',
     maintainer_email='billsteve@126.com',
     license='MIT License',
     packages=find_packages(),
@@ -45,7 +37,8 @@ setup(
         "pymysql",
         "sqlalchemy",
         "logzero",
-        "happybase"
+        "happybase",
+        "tld"
     ],
 
     classifiers=[

@@ -8,17 +8,17 @@
 import user_agent
 
 
-def getRandomUA(**kw):
+def create_random_ua(**kw):
     return user_agent.generate_user_agent(**kw)
 
 
-def getHtmlHeader(**kw):
-    header = getAjaxHeader(**kw)
+def create_html_header(**kw):
+    header = create_ajax_header(**kw)
     header["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
     return header
 
 
-def getAjaxHeader(**kw):
+def create_ajax_header(**kw):
     headers = {
         "Accept": "application/json, text/javascript, */*; q=0.01",
         "Accept-Encoding": "gzip, deflate",
@@ -26,45 +26,50 @@ def getAjaxHeader(**kw):
         "Cache-Control": "max-age=0",
         "Connection": "keep-alive",
         "Upgrade-Insecure-Requests": "1",
-        "User-Agent": str(getRandomUA()),
+        "User-Agent": str(create_random_ua()),
     }
     return headers
 
 
-def getAjaxAccept(header, **kw):
+def create_ajax_accept(header, **kw):
     header["Accept"] = "application/json, text/javascript, */*; q=0.01"
     return header
 
 
-def getImgHeader(header=None):
+def create_img_header(header=None):
     if not header:
-        header = getAjaxHeader()
+        header = create_ajax_header()
     header["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
     return header
 
 
-def getHostHeader(host, **kw):
-    headers = getAjaxHeader(**kw)
+def create_host_header(host, **kw):
+    headers = create_ajax_header(**kw)
     headers["Host"] = host
     return headers
 
 
-def getRefererHeader(referer, **kw):
-    headers = getAjaxHeader(**kw)
+def create_referer_header(referer, **kw):
+    headers = create_ajax_header(**kw)
     headers["Referer"] = referer
     return headers
 
 
-def getHostRefererHeader(host, referer, **kw):
-    headers = getAjaxHeader(**kw)
+def create_host_referer_header(host, referer, **kw):
+    headers = create_ajax_header(**kw)
     headers["Host"] = host
     headers["Referer"] = referer
     return headers
+
+
+def get_header_from_line_str(headers):
+    return {each.split(':', 1)[0].strip(): each.split(':', 1)[1].strip()
+            for each in headers.split('\n') if each.split()}
 
 
 if __name__ == '__main__':
     import time
 
     while 1:
-        print(getImgHeader((getAjaxHeader())))
+        print(create_img_header((create_ajax_header())))
         time.sleep(0.8)

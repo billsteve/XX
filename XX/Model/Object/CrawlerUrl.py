@@ -52,7 +52,7 @@ class CrawlerUrl(object):
         self.create_ts = kw.get("create_ts")
 
     @staticmethod
-    def save2mysql(self, data):
+    def save_2_mysql(self, data):
         ts = int(time.time())
         val = data.get("url"), data.get("url_md5"), data.get("post_data"), data.get("url_type"), data.get(
             "source_url_id"), data.get("cookie"), data.get("data_type"), data.get("resp_status"), data.get(

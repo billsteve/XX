@@ -16,7 +16,7 @@ from logzero import logger
 
 
 # TODO:Rebuild(太不耦合)
-def CacheFile2HBase(root_path, hb_cfg, table_name, pro_num=0):
+def cache_file_2_hbase(root_path, hb_cfg, table_name, pro_num=0):
     conn_hbase = happybase.Connection(**hb_cfg)
     table = conn_hbase.table("crawl_" + table_name)
     for fp, fn in FH.FileHelper.getFileList(root_path):
@@ -26,7 +26,7 @@ def CacheFile2HBase(root_path, hb_cfg, table_name, pro_num=0):
         response = pickle.load(open(fp + os.sep + fn, "rb"))
         row = spider + "_" + Enc.Encrypt.md5(response.url)
         if table.row(row):
-            BF.printFromHead("Exists\t" + row)
+            BF.print_from_head("Exists\t" + row)
             continue
         data = {
             "source:url": str(response.url),

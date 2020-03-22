@@ -7,6 +7,7 @@
 import pymysql
 import requests
 from DBUtils.PooledDB import PooledDB
+
 from XX.List.ListHelper import ListHelper
 
 
@@ -16,40 +17,40 @@ class MysqlPoolHelper:
     host = None
 
     def __init__(self, host="127.0.0.1", user="root", pwd="root", db="test", port=3306, charset="utf8", kv=1, **kw):
-        self._conn = MysqlPoolHelper._getConn(host, user, pwd, db, port, charset.replace("-", ""))
+        self._conn = MysqlPoolHelper.get_conn(host, user, pwd, db, port, charset.replace("-", ""))
         if kv:
             self.cur = self._conn.cursor(cursor=pymysql.cursors.DictCursor)
         else:
             self.cur = self._conn.cursor()
 
     @staticmethod
-    def _getConn(host, user, pwd, db, port=3306, charset="utf8"):
+    def get_conn(host, user, pwd, db, port=3306, charset="utf8"):
         if MysqlPoolHelper.__pool is None or MysqlPoolHelper.db != db or MysqlPoolHelper.host != host:
             MysqlPoolHelper.db = db
             MysqlPoolHelper.__pool = PooledDB(creator=pymysql, host=host, port=port, user=user, passwd=pwd, db=db, use_unicode=False, charset=charset)
             print(host, port, user, pwd, db, charset)
         return MysqlPoolHelper.__pool.connection() if MysqlPoolHelper.__pool else None
 
-    def getLists(self, sql, vals=None, cursor=None):
-        self.cur.execute(sql, vals)
+    def get_lists(self, sql, values=None):
+        self.cur.execute(sql, values)
         res = ListHelper.decodeV(self.cur.fetchall())
         return res
 
-    def execQuery(self, sql, vals=None, cursor=None):
-        res = self.cur.execute(sql, vals)
+    def exec_query(self, sql, values=None):
+        res = self.cur.execute(sql, values)
         self._conn.commit()
         return res
 
-    def execQueryNoCommit(self, sql, vals=None, cursor=None):
-        return self.cur.execute(sql, vals)
+    def exec_query_no_commit(self, sql, values=None):
+        return self.cur.execute(sql, values)
 
-    def commitQuery(self):
+    def commit(self):
         self._conn.commit()
 
-    def rollbackQuery(self):
+    def rollback(self):
         self._conn.rollback()
 
-    def getLastInsertId(self):
+    def get_last_insert_id(self):
         return self.cur.lastrowid
 
     def closeConn(self):
@@ -63,7 +64,7 @@ class MysqlPoolHelper:
         self.cur.close()
         self._conn.close()
 
-    def CheckInfo(self, url, data):
+    def check_info(self, url, data):
         requests.post(url, data=data)
 
 

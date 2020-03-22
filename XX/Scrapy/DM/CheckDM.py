@@ -22,7 +22,7 @@ class Not200(object):
         return cls()
 
     def __init__(self):
-        self.conn_redis = RedisHelper.getRedisConnect(host=self.settings.get("REDIS_HOST"), pwd=self.settings.get("REDIS_PWD"), port=self.settings.get("REDIS_PORT"))
+        self.conn_redis = RedisHelper.get_redis_connect(host=self.settings.get("REDIS_HOST"), pwd=self.settings.get("REDIS_PWD"), port=self.settings.get("REDIS_PORT"))
 
     def process_response(self, request, response, spider):
         if response.status != self.settings.get("STATUS_CODE", 200):
@@ -31,6 +31,6 @@ class Not200(object):
         # 延时
         err_count = self.conn_redis.scard(spider.name + ":start_urls:not200")
         for i in range(int(err_count)):
-            BF.printFromHead("Has " + str(err_count) + " error url Please wait" + "." * i)
+            BF.print_from_head("Has " + str(err_count) + " error url Please wait" + "." * i)
             time.sleep(1)
         return response

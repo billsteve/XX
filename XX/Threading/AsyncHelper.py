@@ -1,15 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time     : 2018/12/11 9:44
-# @Email     : billsteve@126.com
-# @Des       : 
-# @File        : AsyncHelper
-# @Software: PyCharm
-from threading import Thread
 import time
+from threading import Thread
 
 
-def async_call(fn):
+def thread_call(fn):
     def wrapper(*args, **kwargs):
         Thread(target=fn, args=args, kwargs=kwargs).start()
 
@@ -21,13 +15,17 @@ class Test:
         pass
 
     @staticmethod
-    @async_call
+    @thread_call
     def aa():
         print(int(time.time()))
         time.sleep(2)
         print(int(time.time()))
+        return {"k", "v"}
 
 
 if __name__ == '__main__':
-    Test.aa()
-    Test.aa()
+    l = []
+    for url in range(10):
+        r = Test.aa()
+        print(r)
+    print(l)

@@ -35,7 +35,7 @@ def str2int(s):
 
 
 # 获取字符的数量
-def getLetterCount(s):
+def get_letter_count(s):
     num = 0
     for c in s:
         # 英文
@@ -45,7 +45,7 @@ def getLetterCount(s):
 
 
 # 获取汉字数量
-def getZHCount(s):
+def get_zh_count(s):
     num = 0
     for c in s:
         # 英文
@@ -56,5 +56,5 @@ def getZHCount(s):
 
 if __name__ == '__main__':
     s = "我  s 是你的bbaba!"
-    print(getZHCount(s))
+    print(get_zh_count(s))
     pass

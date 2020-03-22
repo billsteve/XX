@@ -36,15 +36,15 @@ class AddInitUrl:
     # URL到rcfg
     @staticmethod
     def add_url2rediscfg(spider, url, cfg, **kwargs):
-        conn_redis = ur.RedisHelper.getRedisConnectByCfg(cfg)
+        conn_redis = ur.RedisHelper.get_redis_connect_by_cfg(cfg)
         return conn_redis.lpush(spider + kwargs.get("suffix", ":start_urls"), url)
 
     # 把数据库中的某一列添加到某个队列中，并且值作为url_fun的参数，添加的是返回值
     @staticmethod
     def add_table_column2redis(pro_num, *args, column=None, url_fun=None, process_num=10, fn="", spider="", module_name="",
                                class_name=None, r_cfg=None, m_cfg=None, service=True, from_id=None, limit=3000, **kwargs):
-        session = sa.SqlAlchemyHelper.getMysqlSessionByCfg(m_cfg)
-        conn_redis = ur.RedisHelper.getRedisConnectByCfg(r_cfg)
+        session = sa.SqlAlchemyHelper.get_session_by_cfg(m_cfg)
+        conn_redis = ur.RedisHelper.get_redis_connect_by_cfg(r_cfg)
         if kwargs.get("del_q"):
             conn_redis.delete(spider + kwargs.get("suffix", ":start_urls"))
         if from_id is None:
@@ -54,7 +54,7 @@ class AddInitUrl:
 
         while 1:
             if conn_redis.llen(spider + kwargs.get("suffix", ":start_urls")) > limit:
-                BF.printFromHead("===Too much\t" + class_name + "\t")
+                BF.print_from_head("===Too much\t" + class_name + "\t")
                 time.sleep(2 * (pro_num + 1))
                 continue
             model_class = getattr(importlib.import_module(module_name), class_name)
@@ -70,7 +70,7 @@ class AddInitUrl:
                         if kwargs.get("bf"):
                             bloomFilter = BloomFilter.BloomFilter(conn_redis, key=spider)
                             if bloomFilter.is_exists(url):
-                                BF.printNoEnd("-")
+                                BF.print_no_end("-")
                             else:
                                 res = conn_redis.lpush(spider + kwargs.get("suffix", ":start_urls"), url)
                                 logger.info(str((spider, res, info.id, url)))
@@ -83,7 +83,7 @@ class AddInitUrl:
                     conn_redis.set("kid_" + str(fn) + "_" + class_name + "_" + str(pro_num) + "_from_id", from_id)
             else:
                 if service:
-                    BF.printFromHead("No More\t" + class_name + "\t")
+                    BF.print_from_head("No More\t" + class_name + "\t")
                     time.sleep(2 * (pro_num + 1))
                     session.commit()
                 else:
@@ -112,24 +112,24 @@ class AddInitUrl:
     def addInitUrlFromCheck(hcfg, rcfg, getRow, ts=0):
         import XX.DB.HappyBaseHelper as HaB
 
-        conn_redis = RedisHelper.getRedisConnectByCfg(rcfg)
-        conn_hbase = HaB.HappyBaseHeleper.getConnectionByCfg(hcfg)
+        conn_redis = RedisHelper.get_redis_connect_by_cfg(rcfg)
+        conn_hbase = HaB.HappyBaseHeleper.get_connection_by_cfg(hcfg)
         # pool = HaB.HappyBaseHeleper.getPoolByCfg(hcfg)
         while 1:
             keys = conn_redis.keys("*:start_urls:check")
             if not keys:
-                BF.printFromHead("No More Check IU in " + str(rcfg["host"]), ts=ts)
+                BF.print_from_head("No More Check IU in " + str(rcfg["host"]), ts=ts)
                 continue
             for key in keys:
                 jd = json.loads(conn_redis.lpop(key))
                 url = jd["url"]
                 if url:
                     # table = HaB.HappyBaseHeleper.getTable("crawl_" + jd["project"], pool=pool)
-                    table = HaB.HappyBaseHeleper.getTable("crawl_" + jd["project"], conn=conn_hbase)
+                    table = HaB.HappyBaseHeleper.get_table("crawl_" + jd["project"], conn=conn_hbase)
                     # HBase是否存在
                     row = getRow(url=url)
                     if row:
-                        exists = HaB.HappyBaseHeleper.getRow(row, table=table)
+                        exists = HaB.HappyBaseHeleper.get_row(row)
                         if not exists:
                             res = conn_redis.lpush(key[:-6], url)
                             print("Add new IU res \t\t" + str(res))
@@ -142,11 +142,11 @@ class AddInitUrl:
     # 重新添加不是200的url到Check
     @staticmethod
     def readdNot200(rcfg, ts=10, suffix=":init_urls"):
-        conn_redis = RedisHelper.getRedisConnectByCfg(rcfg)
+        conn_redis = RedisHelper.get_redis_connect_by_cfg(rcfg)
         while 1:
             keys = conn_redis.keys("*not200*")
             if not keys:
-                BF.printFromHead("No More Spider in " + str(rcfg["host"]), ts=ts)
+                BF.print_from_head("No More Spider in " + str(rcfg["host"]), ts=ts)
                 continue
             for key in keys:
                 url = conn_redis.spop(key)

@@ -14,11 +14,11 @@ from logzero import logger
 
 # @deprecated
 def re_add_not200(rcfg=RC.ali2_cfg(db=0), ts=10):
-    conn_redis = RedisHelper.getRedisConnectByCfg(rcfg)
+    conn_redis = RedisHelper.get_redis_connect_by_cfg(rcfg)
     while 1:
         keys = conn_redis.keys("*not200*")
         if not keys:
-            BF.printFromHead("No More not 200 Spider in " + str(rcfg["host"]), ts=ts)
+            BF.print_from_head("No More not 200 Spider in " + str(rcfg["host"]), ts=ts)
             continue
         for key in keys:
             url = conn_redis.spop(key)

@@ -5,24 +5,7 @@
 # @Des       : 
 # @File        : HeadersDM
 # @Software: PyCharm
-import base64
-import os
-import pickle
 import random
-import time
-import traceback
-
-import XX.Date.DatetimeHelper as ctime
-import XX.Encrypt.EncryptHelper as enc
-import XX.HTTP.RequestsHelper as creq
-import XX.Tools.Proxy as cpxy
-import XX.configs as cc
-import scrapy
-from XX.DB.RedisHelper import *
-from XX.Log.LogHelper import *
-from logzero import logger
-from scrapy.http import TextResponse
-from thrift.transport import TSocket
 
 
 class Header(object):
@@ -42,7 +25,7 @@ class Header(object):
         request.headers.setdefault('User-Agent', self.headers["User-Agent"])
 
 
-class RandomUserAgent_pc(object):
+class RandomUserAgentPc(object):
 
     def process_request(self, request, spider):
         import user_agent

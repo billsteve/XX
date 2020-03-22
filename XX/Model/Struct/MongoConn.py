@@ -6,7 +6,7 @@
 # @Des       : 
 # @File        : MongoConn
 # @Software: PyCharm
-import functools
+
 
 def get_mongo_conn_cfg(**kw):
     d = dict()

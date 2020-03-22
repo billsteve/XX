@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time     : 2018/10/12 16:04
-# @Author   : Peter
-# @Des       : 
-# @File        : CommonHelper
-# @Software: PyCharm
 import os
 
 import XX.File.FileHelper as uf
@@ -12,7 +8,7 @@ import XX.File.FileHelper as uf
 
 class CommonHelper():
     @classmethod
-    def getSpiderByForumId(cls, **kw):
+    def get_spider_by_forum_id(cls, **kw):
         pass
 
     # 获取唯一URL
@@ -22,15 +18,15 @@ class CommonHelper():
 
     # 删除缓存文件
     @staticmethod
-    def removeCacheFile(url, spider, root_path_cache, sc):
+    def remove_cache_file(url, spider, root_path_cache, sc):
         url = CommonHelper.uniqueUrl(url)
-        uf.FileHelper.removeFile(root_path_cache + spider + sc + uf.FileHelper.getMd5Name(url) + ".cache")
+        uf.FileHelper.remove_file(root_path_cache + spider + sc + uf.FileHelper.get_md_5_name(url) + ".cache")
 
     # 获取所有的spider名字
     @staticmethod
-    def getSpiders(path, rp):
+    def get_spiders(path, rp):
         spiders = []
-        fns = uf.FileHelper.getFileList(path)
+        fns = uf.FileHelper.get_file_list(path)
         for fp, fn in fns:
             if fn.endswith("Spider.py"):
                 for line in open(fp + os.sep + fn, encoding="utf-8"):
@@ -42,16 +38,12 @@ class CommonHelper():
         return spiders
 
 
-class ResponeHelper:
+class ResponseHelper:
     @staticmethod
-    def CheckResponse(response):
+    def check_response(response):
         if 400 <= response.status < 600:
             if response.status == 429 or response.status == 407 or response.status == 402:
                 print("==Proxy error=== Status_code is " + str(response.status), flush=True)
             return False
         else:
             return True
-
-
-if __name__ == '__main__':
-    pass

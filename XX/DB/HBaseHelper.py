@@ -6,9 +6,11 @@
 # @File        : HBaseHelper
 # @Software: PyCharm
 import time
+
 from hbase import Hbase
 from hbase.ttypes import *
 from thrift.transport import TSocket
+
 import XX.Encrypt.EncryptHelper as enc
 
 
@@ -21,58 +23,58 @@ class HBaseHelper:
         self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
         self.client = Hbase.Client(self.protocol)
 
-    def getClinet(self, **kw):
+    def get_client(self, **kw):
         transport = TSocket.TSocket(kw.get("host", "localhost"), kw.get("port", 9090))
         transport.open()
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
         self.client = Hbase.Client(protocol)
         return self.client
 
-    def getClinetByCfg(self, cfg):
+    def get_client_by_cfg(self, cfg):
         return self.getClinet(**cfg)
 
     # 获取最近三天的新数据
-    def getCrawlCacheResponse(self, tableName, spider_name, url, expire_seconds=86400, client=None):
+    def get_crawl_cache_response(self, table_name, spider_name, url, expire_seconds=86400, client=None):
         self.client = client if client else self.client
-        result = self.client.getRowWithColumns(tableName, spider_name + "_" + enc.Encrypt.md5(url), ["data:json"])
+        result = self.client.getRowWithColumns(table_name, spider_name + "_" + enc.Encrypt.md5(url), ["data:json"])
         if result:
             if time.time() - result[0].columns.get('data:json').timestamp // 1000 <= expire_seconds:
                 return result[0].columns.get('data:json').value
 
     # 添加缓存数据
-    def addCrawlCacheReponse(self, project, spider_name, url, fc, value, client=None):
+    def add_crawl_cache_response(self, project, spider_name, url, fc, value, client=None):
         self.client = client if client else self.client
         mutation = Mutation(column=fc, value=value)
         return self.client.mutateRow("crawl_cache_" + project, spider_name + "_" + enc.Encrypt.md5(url), [mutation])
 
     # 创建表
-    def createTable(self, table_name, mcolumns, client=None):
+    def create_table(self, table_name, columns, client=None):
         self.client = client if client else self.client
-        self.client.createTable(table_name, mcolumns)
+        self.client.createTable(table_name, columns)
 
     # 获取表
-    def getTables(self, client=None):
+    def get_tables(self, client=None):
         self.client = client if client else self.client
         return self.client.getTableNames()
 
     # 删除整行
-    def delRow(self, table_name, row, client=None):
+    def del_row(self, table_name, row, client=None):
         self.client = client if client else self.client
         return self.client.deleteAllRow(table_name, row)
 
     # 删除列
-    def delRowColumns(self, table_name, row, column, client=None):
+    def del_row_columns(self, table_name, row, column, client=None):
         self.client = client if client else self.client
         self.client.deleteAll(table_name, row, column)
 
     # 遍历表
-    def getLists(self, table, startRow, scolumns, limit=10, client=None):
+    def get_lists(self, table, start_row, columns, limit=10, client=None):
         self.client = client if client else self.client
-        scan_id = self.client.scannerOpen(table, startRow, scolumns)
+        scan_id = self.client.scannerOpen(table, start_row, columns)
         return self.client.scannerGetList(scan_id, limit)
 
     # 添加列
-    def addRowColumn(self, table, row, fc, value, client=None):
+    def add_row_column(self, table, row, fc, value, client=None):
         self.client = client if client else self.client
         mutation = Mutation(column=fc, value=value)
         return self.client.mutateRow(table, row, [mutation])
@@ -80,16 +82,16 @@ class HBaseHelper:
 
 if __name__ == '__main__':
     hb = HBaseHelper(host="zhihan00")
-    print(hb.getTables())
+    print(hb.get_tables())
     exit()
-    columns = []
+    columns = list()
     columns.append(ColumnDescriptor(name='source'))
     columns.append(ColumnDescriptor(name='data'))
-    hb.createTable("crawl_zhihan", columns)
+    hb.create_table("crawl_zhihan", columns)
     exit()
-    startRow = ""
+    start_row = ""
     while 1:
-        results = hb.getLists("crawl_cache_zhihan", startRow, ["source"])
+        results = hb.get_lists("crawl_cache_zhihan", start_row, ["source"])
         if not results:
             print("All Over")
             break

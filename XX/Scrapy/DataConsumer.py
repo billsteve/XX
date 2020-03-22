@@ -1,11 +1,5 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time       : 2018/12/2 16:26
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : DataCustomer.py
-# @Des         :
-# @Software : PyCharm
+# 2018/12/2 16:26
 import importlib
 import json
 import time
@@ -45,8 +39,8 @@ class Redis2Mysql(MQ2DB):
 
     # 初始化redis和MySQL连接类
     def __init__(self, **kw):
-        self.conn_redis = udr.RedisHelper.getRedisConnectByCfg(kw.get("rcfg"))
-        self.conn_mysql = sa.SqlAlchemyHelper.getMysqlSessionByCfg(kw.get("mcfg"))
+        self.conn_redis = udr.RedisHelper.get_redis_connect_by_cfg(kw.get("rcfg"))
+        self.conn_mysql = sa.SqlAlchemyHelper.get_session_by_cfg(kw.get("mcfg"))
 
     # def customer(self, **kw):
     #     self.redis2mysql(**kw)
@@ -65,7 +59,7 @@ class Redis2Mysql(MQ2DB):
                 # func(json_data, kw.get("mcfg"))
                 func(json_data, self.conn_mysql)
             else:
-                bf.printNoEnd(spider + "\tNo more item")
+                bf.print_no_end(spider + "\tNo more item")
                 time.sleep(kw.get("ts", 5))
                 if kw.get("once"):
                     print("One circle over")
@@ -74,8 +68,8 @@ class Redis2Mysql(MQ2DB):
 
 #
 def redis2mysql(**kw):
-    conn_redis = udr.RedisHelper.getRedisConnectByCfg(kw.get("rcfg"))
-    conn_mysql = sa.SqlAlchemyHelper.getMysqlSessionByCfg(kw.get("mcfg"))
+    conn_redis = udr.RedisHelper.get_redis_connect_by_cfg(kw.get("rcfg"))
+    conn_mysql = sa.SqlAlchemyHelper.get_session_by_cfg(kw.get("mcfg"))
     while 1:
         spider = kw.get("spider")
         json_str = conn_redis.rpop(spider + ":items")
@@ -90,7 +84,7 @@ def redis2mysql(**kw):
             conn_mysql.commit()
         else:
             # bf.printFromHead(spider + "\tNo more item")
-            bf.printFromHead(spider + "\tNo more item \t")
+            bf.print_from_head(spider + "\tNo more item \t")
             time.sleep(kw.get("ts", 5))
             if kw.get("once"):
                 print("One circle over")

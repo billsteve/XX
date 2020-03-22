@@ -1,52 +1,133 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time     : 2018/12/17 10:52
-# @Email     : billsteve@126.com
-# @Des       : 
-# @File        : CacheDM
-# @Software: PyCharm
+import os
 import pickle
 import time
 import traceback
 
-import XX.Encrypt.EncryptHelper as enc
 import happybase
-from XX.Log.LogHelper import *
 from logzero import logger
 from scrapy.http import TextResponse
+
+import XX.Encrypt.EncryptHelper as enc
+import XX.File.FileHelper as Fh
+from XX.Log.LogHelper import *
 
 
 # 文件缓存中间件
 class CacheFileRequest(object):
 
+    # TODO:test
+    @staticmethod
+    def get_cache_file(cls, url, spider=None, spider_name=None, root_path_cache="", url_process=None,
+                       url2spider=lambda s: s):
+        if url_process and callable(url_process):
+            url = url_process(url)
+        spider = spider_name if spider_name else (spider if spider else url2spider(url).split(":")[0])
+        root_path_cache = root_path_cache if root_path_cache else ''
+        return root_path_cache + spider + os.sep + Fh.FileHelper.get_md5_name(url) + ".cache"
+
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
-        cls.cahceFilePath = settings.get("FUN_CACHE_FILE_PATH")
+        cls.cache_file_path_func = settings.get("FUN_CACHE_FILE_PATH", cls.get_cache_file)
+        cls.cache_file_exclude = settings.get("CACHE_FILE_EXCLUDE")
+        cls.cache_file_ts = settings.get("CACHE_FILE_TS", None)
+        cls.cache_file_exclude_ts = settings.get("CACHE_FILE_EXCLUDE_TS", cls.cache_file_ts)
         return cls()
 
     def process_request(self, request, spider):
-        cache_file_path = CacheFileRequest.cahceFilePath(request.url, spider=spider.name)
-        if cf.FileHelper.isFileExit(cache_file_path):
+        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name))
+
+        # 是否应该读缓存
+        def should_read_cache(request, spider) -> bool:
+            # 存在缓存文件
+            exists_file = Fh.FileHelper.is_file_exit(cache_file_path)
+            # 是排除URL
+            exclude = 1 if self.cache_file_exclude and request.url.find(self.cache_file_exclude) >= 0 else 0
+            if exists_file:
+                if exclude:
+                    if self.cache_file_exclude_ts >= 0:
+
+                        if time.time() - Fh.FileHelper.get_create_ts(cache_file_path) < self.cache_file_exclude_ts:
+                            return True
+                        else:
+                            logger.debug(
+                                f"缓存文件过期。不读取。{cache_file_path}{Fh.FileHelper.get_create_ts(cache_file_path)}  {request.url}")
+                            return False
+                    # 排除URL无过期时间,就是排除URL都不读缓存
+                    else:
+                        logger.debug(f"排除的，没设置过期时间，全不读缓存。{request.url}")
+                        return False
+                else:
+                    # 全部时间
+                    if self.cache_file_ts:
+                        # 全部URL 没有过期
+                        if time.time() - Fh.FileHelper.get_create_ts(cache_file_path) < self.cache_file_ts:
+                            return True
+                        else:
+                            logger.debug(f"不是排除请求，但是缓存文件过期，不读缓存。{request.url}")
+                            return False
+                    else:
+                        return True
+            else:
+                logger.debug(f"缓存文件不存在。 {request.url}")
+                return False
+
+        if should_read_cache(request, spider):
             try:
-                logger.info("===Read cache===\t" + request.url)
+                logger.info(f"===Read cache===  {cache_file_path.split(os.sep)[-1]}   {request.url}")
                 return pickle.load(open(cache_file_path, "rb"))
-            except:
-                logger.info("== Can't Read cache === ")
+            except Exception as e:
+                logger.info(f"== Can't Read cache ===  Reason is {e}")
                 traceback.print_exc()
+        else:
+            # 不读缓存
+            # logger.info("===Should Not Read Cache===   " + request.url)
+            pass
 
     # 写文件缓存
     def process_response(self, request, response, spider):
-        if response.status == 200:
-            cache_file_path = CacheFileRequest.cahceFilePath(request.url, spider=spider.name)
-            if not cf.FileHelper.isFileExit(cache_file_path):
-                cf.FileHelper.mkdir(cf.FileHelper.getFilePathAndName(cache_file_path)[0])
-                try:
+        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name))
+
+        # 是否应该重写缓存
+        def should_write_cache(request, spider) -> bool:
+            exists_file = Fh.FileHelper.is_file_exit(cache_file_path)
+            exclude = 1 if self.cache_file_exclude and request.url.find(self.cache_file_exclude) >= 0 else 0
+            if exists_file:
+                if exclude:
+                    if self.cache_file_exclude_ts:
+                        if time.time() - Fh.FileHelper.get_create_ts(cache_file_path) > self.cache_file_exclude_ts:
+                            logger.debug(
+                                f"排除缓存文件过期。需要重写。{cache_file_path}{Fh.FileHelper.get_create_ts(cache_file_path)}  {request.url}")
+                            return True
+                        else:
+                            logger.debug(
+                                f"排除的URL没过期，不重写。过了{time.time() - Fh.FileHelper.get_create_ts(cache_file_path)} 秒？ {cache_file_path}")
+                            return False
+                    else:
+                        logger.debug(f"排除URL没设置过期时间 都要重写。 {cache_file_path}")
+                        return True
+                else:
+                    # logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
+                    return False
+            else:
+                logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
+                return True
+
+        if response.status < 300:
+            cf.FileHelper.mkdir(cf.FileHelper.get_file_path_and_name(cache_file_path)[0])
+            try:
+                if should_write_cache(request, spider):
                     pickle.dump(response, open(cache_file_path, "wb"))
-                    logger.info("===Write cache===\t" +cache_file_path+"\t\t" + request.url)
-                except:
-                    logger.info("== Can't Write cache 2 file==   ")
-                    traceback.print_exc()
+                    logger.info(f"===Write cache===      {cache_file_path}   {request.url}")
+                # else:
+                #     logger.info(f"===Cache Exists===      {cache_file_path}   {request.url}")
+            except Exception as e:
+                logger.info(f"== Can't Write cache 2 file==   Reason is {e}")
+                traceback.print_exc()
+        else:
+            logger.info(f"===Status Code ERROR ===   Code is {response.status}" + response.url)
         return response
 
 
@@ -56,22 +137,22 @@ class CacheFileByDayRequest(object):
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
-        cls.cahceFilePathByDay = settings.get("FUN_CACHE_FILE_DAY_PATH")
+        cls.cache_file_path_by_day = settings.get("FUN_CACHE_FILE_DAY_PATH")
         return cls()
 
-    def getCacheResponse(self, request, spider):
-        cache_file_path = CacheFileByDayRequest.cahceFilePathByDay(request.url, spider=spider.name)
-        if cf.FileHelper.isFileExit(cache_file_path):
+    def get_cache_response(self, request, spider):
+        cache_file_path = CacheFileByDayRequest.cache_file_path_by_day(request.url, spider=spider.name)
+        if cf.FileHelper.is_file_exit(cache_file_path):
             try:
                 logger.info("===Read cache===\t" + request.url + "\t" + cache_file_path)
                 return pickle.load(open(cache_file_path, "rb"))
-            except:
-                logger.info("== Can't Read cache === ")
+            except Exception as e:
+                logger.info(f"== Can't Read cache ===  Reason is {e}")
                 traceback.print_exc()
         return None
 
     def process_request(self, request, spider):
-        response = self.getCacheResponse(request, spider)
+        response = self.get_cache_response(request, spider)
         logger.info("R>>>>\trow_key\t" + request.url)
         logger.info("===Read cache===\t" + request.url)
         return response if response else None
@@ -79,17 +160,17 @@ class CacheFileByDayRequest(object):
     # 写文件缓存
     def process_response(self, request, response, spider):
         if response.status == 200:
-            cache_response = self.getCacheResponse(request, spider)
+            cache_response = self.get_cache_response(request, spider)
             if not cache_response:
                 # 不存在缓存文件就要写入
-                cache_file_path = CacheFileByDayRequest.cahceFilePathByDay(request.url, spider=spider.name)
-                if not cf.FileHelper.isFileExit(cache_file_path):
-                    cf.FileHelper.mkdir(cf.FileHelper.getFilePathAndName(cache_file_path)[0])
+                cache_file_path = CacheFileByDayRequest.cache_file_path_by_day(request.url, spider=spider.name)
+                if not cf.FileHelper.is_file_exit(cache_file_path):
+                    cf.FileHelper.mkdir(cf.FileHelper.get_file_path_and_name(cache_file_path)[0])
                     try:
                         pickle.dump(response, open(cache_file_path, "wb"))
                         logger.info("===Save cache===\t" + cache_file_path)
-                    except:
-                        logger.info("== Can't Write cache 2 file==   ")
+                    except Exception as e:
+                        logger.info(f"== Can't Write cache 2 file==  Reason is  {e}")
                         traceback.print_exc()
         return response
 
@@ -105,7 +186,9 @@ class CacheRedisHashRequest(object):
 
     def __init__(self):
         import XX.DB.RedisHelper as RH
-        self.conn_redis7 = RH.RedisHelper.getRedisConnect(self.settings.get("REDIS_HOST"), port=self.settings.get("REDIS_PORT"), pwd=self.settings.get("REDIS_PWD"), db=7)
+        self.conn_redis7 = RH.RedisHelper.get_redis_connect(self.settings.get("REDIS_HOST"),
+                                                            port=self.settings.get("REDIS_PORT"),
+                                                            pwd=self.settings.get("REDIS_PWD"), db=7)
 
     # 读redis缓存
     def process_request(self, request, spider):
@@ -145,7 +228,7 @@ class CacheRedisRequest(object):
 
     def __init__(self):
         import XX.DB.RedisHelper as RH
-        self.conn_redis14 = RH.RedisHelper.getRedisInstance()
+        self.conn_redis14 = RH.RedisHelper.get_redis_instance()
 
     # 读redis缓存
     def process_request(self, request, spider):
@@ -242,7 +325,9 @@ class CacheHappyBaseRequest(object):
         return cls()
 
     def __init__(self):
-        pool = happybase.ConnectionPool(size=3, host=self.settings.get("HBASE_HOST", "localhost"), port=self.settings.get("HBASE_PORT", 9090), protocol='binary', transport='buffered')
+        pool = happybase.ConnectionPool(size=3, host=self.settings.get("HBASE_HOST", "localhost"),
+                                        port=self.settings.get("HBASE_PORT", 9090), protocol='binary',
+                                        transport='buffered')
         self.connection = pool._acquire_connection()
         self.table_name = "crawl_" + self.settings.get("PROJECT_NAME", "crawl")
         self.table = self.connection.table(self.table_name)
@@ -260,7 +345,8 @@ class CacheHappyBaseRequest(object):
             row = self.table.row(row_key, include_timestamp=True)
             if row:
                 # 默认HTML是永久存储的
-                if (request.url.endswith("html") or request.url.endswith("htm")) and not self.settings.get("HBASE_HTML_EXPIRE", 0):
+                if (request.url.endswith("html") or request.url.endswith("htm")) and not self.settings.get(
+                        "HBASE_HTML_EXPIRE", 0):
                     return row
                 expire = int(self.settings.get("HBASE_EXPIRE_TS", 0))
                 if expire > 0:
@@ -282,7 +368,9 @@ class CacheHappyBaseRequest(object):
         if result:
             logger.info("R>>>>\trow_key\t" + str(row_key) + "\t" + request.url)
             encoding = result.get(b"source:encoding", [b"utf-8"])[0].decode("utf-8")
-            return TextResponse(url=result.get(b"source:url")[0].decode("utf-8"), body=result.get(b"source:html")[0].decode("utf-8"), status=result.get(b"source:status_code")[0].decode("utf-8"), encoding=encoding)
+            return TextResponse(url=result.get(b"source:url")[0].decode("utf-8"),
+                                body=result.get(b"source:html")[0].decode("utf-8"),
+                                status=result.get(b"source:status_code")[0].decode("utf-8"), encoding=encoding)
         else:
             pass
 
@@ -313,7 +401,7 @@ class CacheHappyBaseRequest(object):
         pass
 
 
-# HBASE缓存下载中间件
+# HBaseE缓存下载中间件
 class CacheHBaseRK(object):
     @classmethod
     def from_crawler(cls, crawler):
@@ -322,7 +410,9 @@ class CacheHBaseRK(object):
         return cls()
 
     def __init__(self):
-        pool = happybase.ConnectionPool(size=3, host=self.settings.get("HBASE_HOST", "localhost"), port=self.settings.get("HBASE_PORT", 9090), protocol='binary', transport='buffered')
+        pool = happybase.ConnectionPool(size=3, host=self.settings.get("HBASE_HOST", "localhost"),
+                                        port=self.settings.get("HBASE_PORT", 9090), protocol='binary',
+                                        transport='buffered')
         self.connection = pool._acquire_connection()
         self.table_name = "crawl_" + self.settings.get("PROJECT_NAME", "crawl")
         self.table = self.connection.table(self.table_name)
@@ -341,7 +431,8 @@ class CacheHBaseRK(object):
             row = self.table.row(row_key, include_timestamp=True)
             if row:
                 # 默认HTML是永久存储的
-                if (request.url.endswith("html") or request.url.endswith("htm")) and not self.settings.get("HBASE_HTML_EXPIRE", 0):
+                if (request.url.endswith("html") or request.url.endswith("htm")) and not self.settings.get(
+                        "HBASE_HTML_EXPIRE", 0):
                     return row
                 expire = int(self.settings.get("HBASE_EXPIRE_TS", 0))
                 if expire > 0:
@@ -363,7 +454,9 @@ class CacheHBaseRK(object):
         if result:
             logger.info("R>>>>\trow_key\t" + str(row_key) + "\t" + request.url)
             encoding = result.get(b"source:encoding", [b"utf-8"])[0].decode("utf-8")
-            return TextResponse(url=result.get(b"source:url")[0].decode("utf-8"), body=result.get(b"source:html")[0].decode("utf-8"), status=result.get(b"source:status_code")[0].decode("utf-8"), encoding=encoding)
+            return TextResponse(url=result.get(b"source:url")[0].decode("utf-8"),
+                                body=result.get(b"source:html")[0].decode("utf-8"),
+                                status=result.get(b"source:status_code")[0].decode("utf-8"), encoding=encoding)
 
     # 写缓存到HBASE
     def process_response(self, request, response, spider):
@@ -387,6 +480,3 @@ class CacheHBaseRK(object):
             else:
                 logger.info("Not 200 --- " + "\t" + response.url)
         return response
-
-    def close_spider(self):
-        pass

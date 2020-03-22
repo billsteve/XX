@@ -232,7 +232,7 @@ if __name__ == '__main__':
     import XX.HTTP.RequestsHelper as creq
 
     url = "http://www.chexun.com/2018-04-20/105255634.html"
-    r = creq.RequestsHelper.RequestUrl(url)
+    r = creq.RequestHelper.SendCacheRequest(url)
     if r.status_code == 200:
         ex = GetNewsArticle(unicode_url=url, unicode_html=r.text)
         print(ex.get_article())

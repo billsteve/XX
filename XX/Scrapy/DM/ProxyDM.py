@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time     : 2018/12/17 10:52
-# @Email     : billsteve@126.com
-# @Des       : 
-# @File        : ProxyDM
-# @Software: PyCharm
 import base64
 import random
 from logzero import logger
@@ -98,7 +93,7 @@ class MimvpProxy(object):
         return cls()
 
     def __init__(self):
-        self.conn_redis = RedisHelper.RedisHelper.getRedisConnect(self.settings.get("REDIS_HOST"), pwd=self.settings.get("REDIS_PWD"), db=9)
+        self.conn_redis = RedisHelper.RedisHelper.get_redis_connect(self.settings.get("REDIS_HOST"), pwd=self.settings.get("REDIS_PWD"), db=9)
 
     def process_request(self, request, spider):
         ips = self.conn_redis.keys()

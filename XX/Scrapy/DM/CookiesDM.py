@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time         : 2019/2/22 16:17
-# @File           : CookiesDM
-# @Des           :
-# @Email        : billsteve@126.com
 import XX.HTML.HtmlHelper as UH
 
 
