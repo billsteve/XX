@@ -4,7 +4,7 @@
 import json
 
 import XX.HTML.HtmlHelper as chtml
-import XX.Tools.BuiltinFunctions as bf
+import XX.BuiltinFunctions as bf
 from pykafka import KafkaClient
 
 

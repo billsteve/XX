@@ -13,8 +13,6 @@ def urlEncode(k):
 
 
 def parseDict(item):
-    # if isinstance(item, Item):
-    #     item = parseDict(item.__dict__)
     for k in item:
         if isinstance(item[k], str):
             item[k] = urlParse(item[k])
@@ -28,16 +26,18 @@ def formatUrlToDict(url):
     res = {}
     try:
         values = url.split('?')[-1]
-        for key_value in values.split('&'):
-            try:
-                res[key_value.split('=')[0]] = key_value.split('=')[1]
-            except:
-                pass
-        return res
+        if values:
+            for key_value in values.split('&'):
+                if key_value.find("=")>=0:
+                    try:
+                        res[key_value.split('=')[0]] = key_value.split('=')[1]
+                    except:
+                        traceback.print_exc()
+                        pass
     except:
         traceback.print_exc()
         print(" === URL: " + str(url))
-        return {}
+    return res
 
 
 def delHtml(str1):
@@ -56,7 +56,7 @@ def delStr(from_str, start_str, end_str):
     if s_index > 0:
         s_index = len(start_str) + s_index
         e_index = from_str.find(end_str, s_index)
-        if s_index > 0 and e_index > s_index:
+        if s_index < e_index:
             from_str1 = from_str[:s_index - 1]
             from_str2 = from_str[e_index + 1:]
             from_str = from_str1 + from_str2
@@ -94,21 +94,23 @@ def getCookieFromStr(cookie):
     lines = cookie.split(";")
     cookies = {}
     for line in lines:
-        name, value = line.strip().split('=', 1)
-        cookies[name] = value
+        if line.find("=") >= 0:
+            name, value = line.strip().split('=', 1)
+            cookies[name] = value
     return cookies
 
 
 def getHeaderFromLineStr(headers):
-    return {each.split(':', 1)[0].strip(): each.split(':', 1)[1].strip() for each in headers.split('\n') if each.split()}
+    return {each.split(':', 1)[0].strip(): each.split(':', 1)[1].strip() for each in headers.split('\n') if
+            each.split()}
 
 
 # 获取字符串中的数字
 def getNumFromStr(msg):
     if isinstance(msg, str):
-        return re.findall("\d+", str(msg))
+        return re.findall(r"\d+", str(msg))
     elif isinstance(msg, bytes):
-        return re.findall("\d+", str(msg.encode("utf-8")))
+        return re.findall(r"\d+", str(msg.encode("utf-8")))
     else:
         return msg
 
@@ -123,40 +125,6 @@ def getTel(text):
         if tel:
             return tel[0]
         return
-
-
-def getCSSHTML1():
-    font_path = "e:\\1.ttf"
-    try:
-        font = ttLib.TTFont(font_path)
-        font.saveXML("E:\\1.xml")
-        for one in font.getGlyphOrder():
-            print(one)
-        return
-        num = -1
-        for one in font.getGlyphNames():
-            print(one)
-            continue
-            num += 1
-            _from = "xe" + one[4:].lower() + ";"
-            _to = words[num]
-            content = str(content).replace(_from, _to)
-        return content
-    except:
-        print("can't wire font file")
-        traceback.print_exc()
-        return ""
-
-
-def modify_data():
-    data = "<span style='font-family: myfont;'>&#xedfa;</span>弟目前年入35万左右"
-    font_path = "e:\\1.ttf"
-    font = ttLib.TTFont(font_path)
-    uniList = font['cmap'].tables[0].ttFont.getGlyphOrder()
-    print(uniList)
-
-    # 返回替换后的字符串
-    return data
 
 
 def tff2Unicode():  # 将字体映射为unicode列表

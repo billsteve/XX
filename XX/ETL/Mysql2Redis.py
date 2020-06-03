@@ -262,7 +262,7 @@ if __name__ == "__main__":
     #     return str(key)+"\n" if key else key
 
     # r2f = Redis2FileHelper(local, 2)
-    # r2f.R2File("l_test", "E:\\l_test.txt", Total=100, KeyFilter=addN)
+    # r2f.R2File("l_test", "E:\\l_test.log", Total=100, KeyFilter=addN)
     import XX.Model.Struct.MysqlConn as MC
     import XX.Model.Struct.RedisConn as RC
 

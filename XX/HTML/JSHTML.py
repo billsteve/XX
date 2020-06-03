@@ -378,5 +378,5 @@ if __name__ == "__main__":
     html = open("D:\\1.html", "r").read().encode("utf-8")
     print(len(html))
     html = getRealHtml(html)
-    open("D:\\res.txt", "w").write(html)
+    open("D:\\res.log", "w").write(html)
     print("===")

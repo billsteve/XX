@@ -9,7 +9,7 @@
 import time
 from XX.DB.RedisHelper import *
 from logzero import logger
-import XX.Tools.BuiltinFunctions as BF
+import XX.BuiltinFunctions as BF
 
 HBASE_HTML_EXPIRE_TS = 86400 * 30
 

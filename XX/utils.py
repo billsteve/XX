@@ -7,6 +7,8 @@ from logzero import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from .Date.DatetimeHelper import *
+
 
 def get_session(host="localhost", user="root", password="123456", port="3306", charset="utf-8", db="test", *arg, **kw):
     global session
@@ -39,7 +41,7 @@ import pymysql
 global_conn = None
 
 
-def connect(host="localhost", user="root", password="123456", port="3306", charset="utf8", db="test",
+def connect(host="localhost", user="root", password="123456", port=3306, charset="utf8", db="test",
             mysql_timeout=5000, use_global=False):
     global global_conn
     if global_conn:
@@ -124,9 +126,8 @@ def update(conn, sql):
         result = cur.execute(sql)
         conn.commit()
     except Exception as e:
-        logger.info("Mysql Update Error: %s" % e)
-        writefile("mysql-err.txt", sql + "\n", mode="a")
-        logger.info("data update error")
+        logger.info(" ========== Mysql Update Error: %s" % e)
+        writefile("mysql-err.log", get_now_time() + sql + "\n\n\n", mode="a")
         conn.ping()
         conn.rollback()
         result = False
@@ -146,7 +147,6 @@ def fetch(conn, sql):
         conn.commit()
     except Exception as e:
         logger.info("Mysql Fetch Error: %s" % e)
-        logger.info("data fetch error")
         conn.rollback()
         conn.ping()
         list = None
@@ -155,50 +155,35 @@ def fetch(conn, sql):
     return list
 
 
-def make_insert_sql(table, data, updates, replace=1):
-    columnssql = ""
-    valuessql = ""
-    updatessql = ""
+def make_insert_sql(table: str, data: dict, updates: dict, replace=1) -> str:
+    columns_sql = ""
+    values_sql = ""
+    updates_sql = ""
     for key in data.keys():
         if data[key]:
             data[key] = pymysql.escape_string(str(data[key]))
-        columnssql = columnssql + "`" + key + "`,\t"
+        columns_sql = columns_sql + "`" + key + "`,\t"
         if data[key] is not None:
-            valuessql = valuessql + "'" + str(data[key]) + "',\t"
+            values_sql = values_sql + "'" + str(data[key]) + "',\t"
         else:
-            valuessql = valuessql + "null,\t"
+            values_sql = values_sql + "null,\t"
 
         if replace:
             # 覆盖
             if key in updates:
                 if data[key] is not None:
-                    updatessql = updatessql + "`" + key + "` = '" + str(data[key]) + "',\t"
+                    updates_sql = updates_sql + "`" + key + "` = '" + str(data[key]) + "',\t"
                 else:
-                    updatessql = updatessql + "`" + key + "` = null,\t"
+                    updates_sql = updates_sql + "`" + key + "` = null,\t"
         else:
             # 补充
             if key in updates:
                 if data[key]:
-                    updatessql = updatessql + "`" + key + f"` =  CASE WHEN {key}  IS NOT NULL THEN {key} ELSE '" + str(
+                    updates_sql = updates_sql + "`" + key + f"` =  CASE WHEN {key}  IS NOT NULL THEN {key} ELSE '" + str(
                         data[key]) + "'  END,\t"
 
-    sql = "INSERT INTO `#tablename#`( #columns# )VALUES( #values# ) ON DUPLICATE KEY UPDATE #updates# ;\t"
-    columnssql = columnssql[:-2]
-    valuessql = valuessql[:-2]
-    if len(updatessql) > 2:
-        updatessql = updatessql[:-2]
-    sql = sql.replace("#tablename#", table)
-    sql = sql.replace("#columns#", columnssql)
-    sql = sql.replace("#values#", valuessql)
-    sql = sql.replace("#updates#", updatessql)
-    return sql
-
-
-if __name__ == "__main__":
-    data = {
-        "a": 1,
-        "b": None,
-        "c": "hha"
-    }
-    sql = make_insert_sql("t", data, data, 0)
-    print(sql)
+    columns_sql = columns_sql[:-2]
+    values_sql = values_sql[:-2]
+    if len(updates_sql) > 2:
+        updates_sql = updates_sql[:-2]
+    return f"INSERT INTO `{table}`( {columns_sql} )VALUES({values_sql}) ON DUPLICATE KEY UPDATE {updates_sql} ;\t"

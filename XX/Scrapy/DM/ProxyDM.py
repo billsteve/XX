@@ -2,28 +2,29 @@
 # -*- coding: utf-8 -*-
 import base64
 import random
+
 from logzero import logger
 
-import XX.DB.RedisHelper as RedisHelper
+import XX.DB.RedisHelper as Rh
 
 
 class IPPollingProxy(object):
-    # ping from all provices, then get cdn ip
-    proxys_cdn = []
+    # ping from all province, then get cdn ip
+    proxy_cdn = []
 
     # crawl everyday, then check them
-    proxys_public = []
+    proxy_public = []
 
     # You must be allowed within the range of IP
-    proxys_private = [
+    proxy_private = [
         'proxy.scrapy.com:23088',
     ]
 
     # all proxy pool
-    proxys = proxys_public + proxys_private
+    proxy = proxy_public + proxy_private
 
     def process_request(self, request, spider):
-        proxy_ip = random.choice(self.proxys)
+        proxy_ip = random.choice(self.proxy)
         if proxy_ip:
             request.meta['proxy'] = "http://" + proxy_ip
         # 验证代理用户名和密码
@@ -52,9 +53,10 @@ class AbuyunProxy(object):
 
     def process_request(self, request, spider):
         # 代理服务器
-        proxyServer = "http://http-dyn.abuyun.com:9020"
-        proxyAuth = "Basic " + base64.urlsafe_b64encode(bytes((AbuyunProxy.settings.get("PROXY_UN") + ":" + AbuyunProxy.settings.get("PROXY_PWD")), "ascii")).decode("utf8")
-        request.meta["proxy"] = proxyServer
+        proxy_url = "http://http-dyn.abuyun.com:9020"
+        code = bytes((self.settings.get("PROXY_UN") + ":" + self.settings.get("PROXY_PWD")), "ascii")
+        proxyAuth = "Basic " + base64.urlsafe_b64encode(code).decode("utf8")
+        request.meta["proxy"] = proxy_url
         request.headers["Proxy-Authorization"] = proxyAuth
 
 
@@ -93,7 +95,8 @@ class MimvpProxy(object):
         return cls()
 
     def __init__(self):
-        self.conn_redis = RedisHelper.RedisHelper.get_redis_connect(self.settings.get("REDIS_HOST"), pwd=self.settings.get("REDIS_PWD"), db=9)
+        self.conn_redis = Rh.RedisHelper.get_redis_connect(self.settings.get("REDIS_HOST"),
+                                                           password=self.settings.get("REDIS_PWD"), db=9)
 
     def process_request(self, request, spider):
         ips = self.conn_redis.keys()

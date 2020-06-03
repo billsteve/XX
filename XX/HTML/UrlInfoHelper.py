@@ -20,9 +20,9 @@ class UrlInfoHelper(object):
             print("==UrlInfoHelper->Add redis is wrong")
         if del_cache:
             cache_fp = getUrlCachePath(uniqueUrl(url_info.get("url")), spider=spider)
-            if cf.FileHelper.isFileExit(cache_fp):
+            if cf.FileHelper.is_file_exit(cache_fp):
                 print("Remove cache file + " + cache_fp + "\t url  is " + url_info.get("url"))
-                cf.FileHelper.removeFile(cache_fp)
+                cf.FileHelper.remove_file(cache_fp)
             else:
                 print("=====Cache is not exists========" + cache_fp)
         else:

@@ -93,7 +93,7 @@ class FileHelper(object):
 
     @staticmethod
     def is_file_exit(fpath):
-        return 1 if os.path.isfile(fpath) else 0
+        return 1 if fpath and os.path.isfile(fpath) else 0
 
     @staticmethod
     def remove_file(fpath, ts=0):
@@ -179,9 +179,9 @@ if __name__ == "__main__":
     # print(FileHelper.getFileName("E:\\t82.html"))
     # print(FileHelper.getFileExt("E:\\t82.html"))
 
-    # FileHelper.saveFile("E:\\ele\\ele\\111.txt", "12121")
+    # FileHelper.saveFile("E:\\ele\\ele\\111.log", "12121")
     # print(FileHelper.getMd5Name("1"))
 
-    r = FileHelper.remove_file("C:\\Users\\billsteve\\Desktop\\tmp\\1.txt")
+    r = FileHelper.remove_file("C:\\Users\\billsteve\\Desktop\\tmp\\1.log")
     print(r)
     # print(FileHelper.getUpdateTs("d:\\1.html"))

@@ -4,14 +4,19 @@ import os
 import pickle
 import time
 import traceback
+from typing import Union
 
 import happybase
 from logzero import logger
-from scrapy.http import TextResponse
+from scrapy.http import Request
+from scrapy.http import TextResponse, Response
 
 import XX.Encrypt.EncryptHelper as enc
 import XX.File.FileHelper as Fh
 from XX.Log.LogHelper import *
+
+process_request_type = Union[None, Response, Request]
+process_response_type = Union[Response, Request]
 
 
 # 文件缓存中间件
@@ -36,7 +41,7 @@ class CacheFileRequest(object):
         cls.cache_file_exclude_ts = settings.get("CACHE_FILE_EXCLUDE_TS", cls.cache_file_ts)
         return cls()
 
-    def process_request(self, request, spider):
+    def process_request(self, request, spider) -> process_request_type:
         cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name))
 
         # 是否应该读缓存
@@ -87,7 +92,7 @@ class CacheFileRequest(object):
             pass
 
     # 写文件缓存
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response, spider) -> process_response_type:
         cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name))
 
         # 是否应该重写缓存
@@ -151,14 +156,14 @@ class CacheFileByDayRequest(object):
                 traceback.print_exc()
         return None
 
-    def process_request(self, request, spider):
+    def process_request(self, request, spider) -> process_request_type:
         response = self.get_cache_response(request, spider)
         logger.info("R>>>>\trow_key\t" + request.url)
         logger.info("===Read cache===\t" + request.url)
         return response if response else None
 
     # 写文件缓存
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response, spider) -> process_response_type:
         if response.status == 200:
             cache_response = self.get_cache_response(request, spider)
             if not cache_response:
@@ -188,10 +193,10 @@ class CacheRedisHashRequest(object):
         import XX.DB.RedisHelper as RH
         self.conn_redis7 = RH.RedisHelper.get_redis_connect(self.settings.get("REDIS_HOST"),
                                                             port=self.settings.get("REDIS_PORT"),
-                                                            pwd=self.settings.get("REDIS_PWD"), db=7)
+                                                            password=self.settings.get("REDIS_PWD"), db=7)
 
     # 读redis缓存
-    def process_request(self, request, spider):
+    def process_request(self, request, spider) -> process_request_type:
         if self.conn_redis7.exists(request.url):
             print("==Read cache 2 redis==")
             url = self.conn_redis7.hget(request.url, "url")
@@ -201,7 +206,7 @@ class CacheRedisHashRequest(object):
             return TextResponse(url=url, body=html, status=status_code, encoding=encoding)
 
     # 写redis缓存
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response, spider) -> process_response_type:
         if response.status == 200:
             try:
                 if not self.conn_redis7.exists(response.url):
@@ -231,20 +236,21 @@ class CacheRedisRequest(object):
         self.conn_redis14 = RH.RedisHelper.get_redis_instance()
 
     # 读redis缓存
-    def process_request(self, request, spider):
+    def process_request(self, request, spider) -> process_request_type:
         try:
             content = self.conn_redis14.get(request.url)
             if content:
                 try:
-                    response = pickle.loads(content)
-                except:
+                    return pickle.loads(content)
+                except Exception as e:
                     self.conn_redis14.delete(request.url)
+                    logger.info(e)
         except:
             print("==Can't Read cache from redis==")
             traceback.print_exc()
 
     # 写redis缓存
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response, spider) -> process_response_type:
         if response.status == 200:
             try:
                 if not self.conn_redis14.exists(response.url):
@@ -289,7 +295,7 @@ class CacheRedisRequest(object):
 #         return None
 #
 #     # 读缓存，生成response
-#     def process_request(self, request, spider):
+#     def process_request(self, request, spider) -> process_request_type:
 #         result = self.getCacheResult(request, spider)
 #         if result:
 #             logger.info("Read response from hbase" + ">>>\t" + request.url)
@@ -298,7 +304,7 @@ class CacheRedisRequest(object):
 #             return TextResponse(url=col.get('source:url').value, body=col.get('source:html').value, status=col.get('source:status_code').value, encoding=encoding)
 #
 #     # 写缓存到HBASE
-#     def process_response(self, request, response, spider):
+#     def process_response(self, request, response, spider) -> process_response_type:
 #         if not self.getCacheResult(request, spider):
 #             if response.status == 200:
 #                 row = spider.name + "_" + enc.Encrypt.md5(response.url)
@@ -362,7 +368,7 @@ class CacheHappyBaseRequest(object):
         return None
 
     # 读缓存，生成response
-    def process_request(self, request, spider):
+    def process_request(self, request, spider) -> process_request_type:
         row_key = spider.name + "_" + enc.Encrypt.md5(request.url)
         result = self.getCacheResult(request, spider, row_key=row_key)
         if result:
@@ -375,7 +381,7 @@ class CacheHappyBaseRequest(object):
             pass
 
     # 写缓存到HBASE
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response, spider) -> process_response_type:
         if not self.getCacheResult(request, spider):
             if response.status == 200:
                 data = {
@@ -448,7 +454,7 @@ class CacheHBaseRK(object):
         return None
 
     # 读缓存，生成response
-    def process_request(self, request, spider):
+    def process_request(self, request, spider) -> process_request_type:
         row_key = self.settings.get("HBASE_ROW_KEY_FUN")(request=request)
         result = self.getCacheResult(request, spider, row_key=row_key)
         if result:
@@ -459,7 +465,7 @@ class CacheHBaseRK(object):
                                 status=result.get(b"source:status_code")[0].decode("utf-8"), encoding=encoding)
 
     # 写缓存到HBASE
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response, spider) -> process_response_type:
         if not self.getCacheResult(request, spider):
             if response.status == 200:
                 data = {

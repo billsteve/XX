@@ -31,7 +31,7 @@ class HBaseHelper:
         return self.client
 
     def get_client_by_cfg(self, cfg):
-        return self.getClinet(**cfg)
+        return self.get_client(**cfg)
 
     # 获取最近三天的新数据
     def get_crawl_cache_response(self, table_name, spider_name, url, expire_seconds=86400, client=None):

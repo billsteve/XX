@@ -26,10 +26,10 @@ root_path_liebao_json = root_path_liebao_log + "jsons" + sc
 root_path_liebao_font = root_path_liebao + "font" + sc
 root_path_html = root_path + "html" + sc
 root_path_cache = root_path_liebao_cache
-EXCEPT_PATH = root_path_liebao_log + "parse_fail.txt"
-NO_MORE_PATH = root_path_liebao_log + "no_more.txt"
-NO_DATA_PATH = root_path_liebao_log + "no_data.txt"
-INCOMPLETE_PATH = root_path_liebao_log + "imcomplete.txt"
+EXCEPT_PATH = root_path_liebao_log + "parse_fail.log"
+NO_MORE_PATH = root_path_liebao_log + "no_more.log"
+NO_DATA_PATH = root_path_liebao_log + "no_data.log"
+INCOMPLETE_PATH = root_path_liebao_log + "imcomplete.log"
 
 # car
 root_path_car = root_path + "car" + sc
@@ -73,10 +73,10 @@ root_path_awb_json = root_path_awb + "json" + sc
 
 # LOG地址
 Project_log = root_path_zh_log
-EXCEPT_PATH = Project_log + "parse_fail.txt"
-NO_MORE_PATH = Project_log + "no_more.txt"
-NO_DATA_PATH = Project_log + "no_data.txt"
-INCOMPLETE_PATH = Project_log + "imcomplete.txt"
+EXCEPT_PATH = Project_log + "parse_fail.log"
+NO_MORE_PATH = Project_log + "no_more.log"
+NO_DATA_PATH = Project_log + "no_data.log"
+INCOMPLETE_PATH = Project_log + "imcomplete.log"
 
 # _var = vars()
 # for k in dir():

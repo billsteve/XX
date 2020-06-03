@@ -6,6 +6,7 @@ import requests
 from logzero import logger
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
+import XX.Encrypt.EncryptHelper as Enc
 import XX.String.StringHelper as String
 from XX.File.FileHelper import *
 from XX.Model.Object.ResponseObj import *
@@ -28,7 +29,7 @@ class RequestHelper(object):
         proxies = kw["proxies"] if "proxies" in kw.keys() else None
         timeout = kw["timeout"] if "timeout" in kw.keys() else None
         verify = kw["verify"] if "verify" in kw.keys() else True
-        json_ = kw["json"] if "json" in kw.keys() else True
+        json_ = kw["json"] if "json" in kw.keys() else None
         allow_redirects = kw["allow_redirects"] if "allow_redirects" in kw.keys() else True
         try:
             if method.lower() in ["get", "post", "head", "delete", "put", "options", 'patch']:
@@ -48,10 +49,14 @@ class RequestHelper(object):
                 except Exception as e:
                     response.msg = f"Response is not json! Exception : {e}"
                     pass
-            response.cookies = requests.utils.dict_from_cookiejar(request.cookies)
+            if request.cookies:
+                response.cookies = requests.utils.dict_from_cookiejar(request.cookies)
             response.RequestHeaders = headers
             response.encoding = request.encoding
-            response.ResponseHeaders = dict(request.headers)
+            response.data = data
+            response.json = json_
+            if request.headers:
+                response.ResponseHeaders = dict(request.headers)
             response.headers = response.ResponseHeaders
             if 500 <= request.status_code < 600:
                 response.msg = "500-600"
@@ -71,7 +76,7 @@ class RequestHelper(object):
         # 写缓存
         if kw.get("save_path"):
             FileHelper.remove_file(kw.get("save_path"))
-            logger.info("Delete old cache file ")
+            # logger.info("Delete old cache file ")
         resp = RequestHelper.send_request(url, *arg, **kw)
         if resp.status_code <= 300:
             try:
@@ -95,7 +100,7 @@ class RequestHelper(object):
                 traceback.print_exc()
                 logger.debug("===Can't dump html file to >> " + str(kw.get("save_path")) + f"    {e}")
         else:
-            logger.debug(f"Not 200:{resp.status_code}.  {url}")
+            # logger.debug(f"Not 200:{resp.status_code}.  {url}")
             return resp
 
     # 缓存文件请求
@@ -186,8 +191,20 @@ class RequestHelper(object):
             return
 
 
+def cache_response(response, roo_path=None):
+    if hasattr(response, "cache_file") and response.cache_file:
+        pickle.dump(response, open(response.cache_file, "wb"))
+    else:
+        fp = roo_path + FileHelper.get_md5_name(response.url + Enc.Encrypt.md5(str(response.headers))) + ".pickle"
+        FileHelper.mkdir(FileHelper.get_file_path_and_name(fp)[0])
+        pickle.dump(response, open(fp, "wb"))
+    return 1
+
+
 if __name__ == "__main__":
     # url = "https://www.baidu.com/?tn=98010089_dg"
     # save_path = "E:\\baidu.pick"
     # req = RequestHelper.try_request_url(url, save_path=save_path, refresh=1, verify=False, method="get")
+    # response = ResponseObj(status_code=0, url="1.com", headers={"kl": "v2"})
+    # r = cache_response(response, roo_path="./")
     pass
