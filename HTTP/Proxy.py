@@ -184,8 +184,6 @@ def get_proxy_by_ip(ip, port):
 get_abuyun_proxy = get_proxy
 
 if __name__ == '__main__':
-    proxy = get_abuyun_proxy()
     import requests
 
-    r = requests.get("https://www.jd.com/", proxies=proxy)
-    print(r.status_code)
+    headers = {}
