@@ -4,6 +4,7 @@ import random
 import traceback
 
 import redis
+import requests
 
 import XX.Date.DatetimeHelper as Dt
 import XX.HTTP.RequestsHelper as Rh
@@ -184,6 +185,4 @@ def get_proxy_by_ip(ip, port):
 get_abuyun_proxy = get_proxy
 
 if __name__ == '__main__':
-    import requests
-
     headers = {}
