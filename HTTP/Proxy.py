@@ -22,6 +22,22 @@ def get_proxy(un="H76Z3LKO67NRN5QD", pwd="272305BABB9380E1", profession=False) -
     return {"http": proxyMeta, "https": proxyMeta}
 
 
+def change_ip_abuyun(un="H76Z3LKO67NRN5QD", pwd="272305BABB9380E1"):
+    # 代理隧道验证信息
+    proxyMeta = "http://%(user)s:%(pass)s@%(host)s:%(port)s" % {
+        "host": "http-dyn.abuyun.com",
+        "port": "9010",
+        "user": un,
+        "pass": pwd,
+    }
+    url = "http://proxy.abuyun.com/switch-ip"
+    pxy = {"http": proxyMeta, "https": proxyMeta}
+    import requests
+    res = requests.get(url, proxies=pxy)
+    print("Change ip res is ", res.text)
+    return 1
+
+
 def get_random_proxy(r):
     ips = r.keys()
     while 1:
