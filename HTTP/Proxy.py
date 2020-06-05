@@ -1,6 +1,7 @@
 # -*- encoding:utf8 -*-
 import json
 import random
+import requests
 import traceback
 
 import redis
@@ -185,7 +186,6 @@ get_abuyun_proxy = get_proxy
 
 if __name__ == '__main__':
     proxy = get_abuyun_proxy()
-    import requests
 
     r = requests.get("https://www.jd.com/", proxies=proxy)
     print(r.status_code)
