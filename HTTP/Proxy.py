@@ -184,7 +184,7 @@ def get_proxy_by_ip(ip, port):
 get_abuyun_proxy = get_proxy
 
 if __name__ == '__main__':
-    proxy = get_abuyun_proxy("H98KW9664832F56D", "22E8C0DE197A4C7E")
+    proxy = get_abuyun_proxy("H98KW9664832F56", "22E8C0DE197A4C7")
     import requests
 
     r = requests.get("https://www.jd.com/", proxies=proxy)
