@@ -41,6 +41,7 @@ class RequestHelper(object):
                 return response
             request = func(url, data=data, headers=headers, cookies=cookies, proxies=proxies,
                            timeout=timeout, verify=verify, allow_redirects=allow_redirects, json=json_)
+            request.encoding = request.apparent_encoding
             response.status = response.status_code = request.status_code
             response.text = request.text
             if kw.get("serialization_type") == "json":
