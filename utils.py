@@ -126,7 +126,7 @@ def update(conn, sql):
         result = cur.execute(sql)
         conn.commit()
     except Exception as e:
-        logger.info(" ========== Mysql Update Error: %s" % e)
+        logger.info(f" ========== Mysql Update Error: {e}  sql :  {sql}")
         writefile("mysql-err.log", get_now_time() + sql + "\n\n\n", mode="a")
         conn.ping()
         conn.rollback()
