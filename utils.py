@@ -146,7 +146,7 @@ def fetch(conn, sql):
         list = cur.fetchmany(rs)
         conn.commit()
     except Exception as e:
-        logger.info("Mysql Fetch Error: %s" % e)
+        logger.info(f"Mysql Fetch Error: %s\n{sql}" % e)
         conn.rollback()
         conn.ping()
         list = None
