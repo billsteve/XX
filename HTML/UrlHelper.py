@@ -3,12 +3,14 @@
 import urllib.parse as parse
 from urllib.parse import urlparse
 
-import XX.Dict.DictHelper as h_dict
-import XX.RegExp.RegExp as Re
+import tldextract
 from tld import parse_tld, get_tld
 
+import XX.Dict.DictHelper as h_dict
+import XX.RegExp.RegExp as Re
 
-class UrlHelper():
+
+class UrlHelper:
 
     # 检验是否是一个合法URL
     @staticmethod
@@ -31,6 +33,21 @@ class UrlHelper():
     def get_domain(url):
         url = UrlHelper.add_schema(url)
         return urlparse(url).hostname
+
+    # 获取父域名
+    @staticmethod
+    def get_pdomain(url):
+        try:
+            val = tldextract.extract(url)
+            if val.subdomain and val.subdomain != "www":
+                if val.subdomain.count(".") > 0:
+                    return f"""{".".join(val.subdomain.split('.')[1:])}.{val.domain}.{val.suffix}"""
+                else:
+                    return "{0}.{1}".format(val.domain, val.suffix)
+            else:
+                return None
+        except Exception as e:
+            return None
 
     # 获取协议
     @staticmethod
@@ -179,5 +196,5 @@ class UrlHelper():
 
 if __name__ == '__main__':
     u = UrlHelper()
-    d = u.get_domain("http://localjhost.com:9100/")
+    d = u.get_pdomain("2.3.1.ww.ymw.cn/")
     print(d)
