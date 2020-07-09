@@ -131,8 +131,6 @@ def update(conn, sql):
         conn.ping()
         conn.rollback()
         result = False
-    finally:
-        cur.close()
     return result
 
 

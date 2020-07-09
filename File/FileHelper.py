@@ -20,9 +20,9 @@ class FileHelper(object):
 
     @staticmethod
     def get_file_list(file_path, *arg, **kw):
-        for parent, dirnames, filenames in os.walk(file_path):
-            dirnames.sort()
-            for filename in filenames:
+        for parent, dir_names, file_names in os.walk(file_path):
+            dir_names.sort()
+            for filename in file_names:
                 yield parent, filename
 
     @staticmethod
@@ -42,7 +42,8 @@ class FileHelper(object):
     @staticmethod
     def read_file_lines(file_path, *arg, **kw):
         try:
-            return open(file_path, "r", encoding="utf-8").readlines()
+            return open(file_path, kw.get("method", "r"),
+                        encoding=kw.get("encoding", "utf-8")).readlines()
         except TypeError:
             return open(file_path, "r").readline()
         except:
@@ -53,7 +54,7 @@ class FileHelper(object):
     def save_file(file_path, content="", method="a", *arg, **kw):
         try:
             FileHelper.mkdir(FileHelper.get_file_path_and_name(file_path)[0])
-            return open(file_path, method, encoding="utf-8").write(content)
+            return open(file_path, method, encoding=kw.get("encoding", "utf-8")).write(content)
         except TypeError:
             open(file_path, method).write(content)
             return len(content)

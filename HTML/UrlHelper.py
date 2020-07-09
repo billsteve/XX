@@ -32,7 +32,7 @@ class UrlHelper:
     @staticmethod
     def get_domain(url):
         url = UrlHelper.add_schema(url)
-        return urlparse(url).hostname
+        return urlparse(url).hostname.strip()
 
     # 获取父域名
     @staticmethod
@@ -196,5 +196,5 @@ class UrlHelper:
 
 if __name__ == '__main__':
     u = UrlHelper()
-    d = u.get_pdomain("2.3.1.ww.ymw.cn/")
+    d = u.get_scheme("https://2.3.1.ww.ymw.cn/")
     print(d)
