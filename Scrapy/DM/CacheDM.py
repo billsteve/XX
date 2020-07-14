@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
 import pickle
@@ -13,6 +12,7 @@ from scrapy.http import TextResponse, Response
 
 import XX.Encrypt.EncryptHelper as enc
 import XX.File.FileHelper as Fh
+from XX.HTML.UrlHelper import UrlHelper as Uh
 from XX.Log.LogHelper import *
 
 process_request_type = Union[None, Response, Request]
@@ -21,28 +21,29 @@ process_response_type = Union[Response, Request]
 
 # 文件缓存中间件
 class CacheFileRequest(object):
-
-    # TODO:test
     @staticmethod
-    def get_cache_file(cls, url, spider=None, spider_name=None, root_path_cache="", url_process=None,
-                       url2spider=lambda s: s):
-        if url_process and callable(url_process):
-            url = url_process(url)
-        spider = spider_name if spider_name else (spider if spider else url2spider(url).split(":")[0])
-        root_path_cache = root_path_cache if root_path_cache else ''
+    def get_cache_file(*args, **kwargs):
+
+        spider = kwargs.get("spider")
+        url = kwargs.get("url")
+        root_path_cache = kwargs.get("root_path_cache", "./")
+        spider = spider if spider else Uh.get_domain(url).replace(".", "_")
         return root_path_cache + spider + os.sep + Fh.FileHelper.get_md5_name(url) + ".cache"
 
     @classmethod
     def from_crawler(cls, crawler):
+
         settings = crawler.settings
         cls.cache_file_path_func = settings.get("FUN_CACHE_FILE_PATH", cls.get_cache_file)
         cls.cache_file_exclude = settings.get("CACHE_FILE_EXCLUDE")
         cls.cache_file_ts = settings.get("CACHE_FILE_TS", None)
         cls.cache_file_exclude_ts = settings.get("CACHE_FILE_EXCLUDE_TS", cls.cache_file_ts)
+        cls.settings = settings
         return cls()
 
     def process_request(self, request, spider) -> process_request_type:
-        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name))
+        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name),
+                                                    root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
 
         # 是否应该读缓存
         def should_read_cache(request, spider) -> bool:
@@ -93,7 +94,8 @@ class CacheFileRequest(object):
 
     # 写文件缓存
     def process_response(self, request, response, spider) -> process_response_type:
-        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name))
+        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name),
+                                                    root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
 
         # 是否应该重写缓存
         def should_write_cache(request, spider) -> bool:
@@ -117,7 +119,7 @@ class CacheFileRequest(object):
                     # logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
                     return False
             else:
-                logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
+                # logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
                 return True
 
         if response.status < 300:
