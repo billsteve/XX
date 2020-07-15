@@ -44,6 +44,7 @@ class RequestHelper(object):
             request.encoding = request.apparent_encoding
             response.status = response.status_code = request.status_code
             response.text = request.text
+            response.content = request.content
             if kw.get("serialization_type") == "json":
                 try:
                     response.text = request.json()
