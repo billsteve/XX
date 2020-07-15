@@ -5,15 +5,15 @@ import time
 import traceback
 from typing import Union
 
+import XX.Encrypt.EncryptHelper as enc
+import XX.File.FileHelper as Fh
 import happybase
+from XX.Date.DatetimeHelper import get_today
+from XX.HTML.UrlHelper import UrlHelper as Uh
+from XX.Log.LogHelper import *
 from logzero import logger
 from scrapy.http import Request
 from scrapy.http import TextResponse, Response
-
-import XX.Encrypt.EncryptHelper as enc
-import XX.File.FileHelper as Fh
-from XX.HTML.UrlHelper import UrlHelper as Uh
-from XX.Log.LogHelper import *
 
 process_request_type = Union[None, Response, Request]
 process_response_type = Union[Response, Request]
@@ -23,7 +23,6 @@ process_response_type = Union[Response, Request]
 class CacheFileRequest(object):
     @staticmethod
     def get_cache_file(*args, **kwargs):
-
         spider = kwargs.get("spider")
         url = kwargs.get("url")
         root_path_cache = kwargs.get("root_path_cache", "./")
@@ -86,6 +85,7 @@ class CacheFileRequest(object):
                 return pickle.load(open(cache_file_path, "rb"))
             except Exception as e:
                 logger.info(f"== Can't Read cache ===  Reason is {e}")
+                Fh.FileHelper.remove_file(cache_file_path)
                 traceback.print_exc()
         else:
             # 不读缓存
@@ -132,7 +132,8 @@ class CacheFileRequest(object):
                 #     logger.info(f"===Cache Exists===      {cache_file_path}   {request.url}")
             except Exception as e:
                 logger.info(f"== Can't Write cache 2 file==   Reason is {e}")
-                traceback.print_exc()
+                Fh.FileHelper.remove_file(cache_file_path)
+                # traceback.print_exc()
         else:
             logger.info(f"===Status Code ERROR ===   Code is {response.status}" + response.url)
         return response
@@ -140,27 +141,37 @@ class CacheFileRequest(object):
 
 # 文件按天缓存中间件
 class CacheFileByDayRequest(object):
+    @staticmethod
+    def get_cache_file(*args, **kwargs):
+        spider = kwargs.get("spider")
+        url = kwargs.get("url")
+        root_path_cache = kwargs.get("root_path_cache", "./")
+        spider = spider if spider else Uh.get_domain(url).replace(".", "_")
+        today = get_today().replace("-", "_")
+        return root_path_cache + spider + os.sep + today + os.sep + Fh.FileHelper.get_md5_name(url) + ".cache"
 
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
-        cls.cache_file_path_by_day = settings.get("FUN_CACHE_FILE_DAY_PATH")
+        cls.cache_file_path_by_day = settings.get("FUN_CACHE_FILE_DAY_PATH", cls.get_cache_file)
+        cls.settings = settings
         return cls()
 
     def get_cache_response(self, request, spider):
-        cache_file_path = CacheFileByDayRequest.cache_file_path_by_day(request.url, spider=spider.name)
+        cache_file_path = self.cache_file_path_by_day(url=request.url, spider=spider.name,
+                                                      root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
         if cf.FileHelper.is_file_exit(cache_file_path):
             try:
                 logger.info("===Read cache===\t" + request.url + "\t" + cache_file_path)
                 return pickle.load(open(cache_file_path, "rb"))
             except Exception as e:
                 logger.info(f"== Can't Read cache ===  Reason is {e}")
+                Fh.FileHelper.remove_file(cache_file_path)
                 traceback.print_exc()
         return None
 
     def process_request(self, request, spider) -> process_request_type:
         response = self.get_cache_response(request, spider)
-        logger.info("R>>>>\trow_key\t" + request.url)
         logger.info("===Read cache===\t" + request.url)
         return response if response else None
 
@@ -170,7 +181,9 @@ class CacheFileByDayRequest(object):
             cache_response = self.get_cache_response(request, spider)
             if not cache_response:
                 # 不存在缓存文件就要写入
-                cache_file_path = CacheFileByDayRequest.cache_file_path_by_day(request.url, spider=spider.name)
+                cache_file_path = self.cache_file_path_by_day(url=request.url,
+                                                              spider=spider.name,
+                                                              root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
                 if not cf.FileHelper.is_file_exit(cache_file_path):
                     cf.FileHelper.mkdir(cf.FileHelper.get_file_path_and_name(cache_file_path)[0])
                     try:
@@ -178,6 +191,7 @@ class CacheFileByDayRequest(object):
                         logger.info("===Save cache===\t" + cache_file_path)
                     except Exception as e:
                         logger.info(f"== Can't Write cache 2 file==  Reason is  {e}")
+                        Fh.FileHelper.remove_file(cache_file_path)
                         traceback.print_exc()
         return response
 
