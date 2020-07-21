@@ -126,6 +126,7 @@ class CacheFileRequest(object):
             cf.FileHelper.mkdir(cf.FileHelper.get_file_path_and_name(cache_file_path)[0])
             try:
                 if should_write_cache(request, spider):
+                    del response.certificate
                     pickle.dump(response, open(cache_file_path, "wb"))
                     logger.info(f"===Write cache===      {cache_file_path}   {request.url}")
                 # else:
