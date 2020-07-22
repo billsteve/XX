@@ -3,11 +3,10 @@
 import hashlib
 import os
 
+from Date.DatetimeHelper import *
 from logzero import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from .Date.DatetimeHelper import *
 
 
 def get_session(host="localhost", user="root", password="123456", port="3306", charset="utf-8", db="test", *arg, **kw):
@@ -187,14 +186,20 @@ def make_insert_sql(table: str, data: dict, updates: dict, replace=1) -> str:
     return f"INSERT INTO `{table}`( {columns_sql} )VALUES({values_sql}) ON DUPLICATE KEY UPDATE {updates_sql} ;\t"
 
 
-def make_update_sql(table: str, data: dict, updates: dict, replace=1) -> str:
+def make_update_sql(table: str, data: dict, replace=1) -> str:
     sql = f"UPDATE `{table}` SET "
     update_ = ''
     for k, v in data.items():
         if replace:
-            update_ += f",{k.strip()}='{pymysql.escape_string(v)}' "
+            if v:
+                update_ += f",{k.strip()}='{pymysql.escape_string(str(v))}' \n "
+            else:
+                update_ += f",{k.strip()}=null \n"
         else:
-            update_ += f",{k.strip()}=CASE WHEN {k}  IS NOT NULL THEN {k} ELSE '{pymysql.escape_string(v)}' END "
+            if v:
+                update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE '{pymysql.escape_string(str(v))}' END \n"
+            else:
+                update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE null END \n"
     update_ = update_.lstrip(",")
     sql += update_ + f" WHERE id = {data['id']}"
     return sql
