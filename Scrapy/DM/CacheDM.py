@@ -77,7 +77,7 @@ class CacheFileRequest(object):
                     else:
                         return True
             else:
-                logger.debug(f"缓存文件不存在。 {request.url}")
+                # logger.debug(f"缓存文件不存在。 {request.url}")
                 return False
 
         if should_read_cache(request, spider):
