@@ -20,15 +20,17 @@ class DictHelper():
                 return key
 
     @staticmethod
-    def decodeV(d, coding="utf-8"):
+    def decode_v(d, coding="utf-8"):
         dd = {}
         for k, v in d.items():
+            if isinstance(k, bytes):
+                k = k.decode(coding)
             if type(v) == dict:
                 dd[k] = DictHelper.decodeV(v, coding)
             elif type(v) == bytes:
                 dd[k] = str(v.decode(coding))
             elif type(v) == list or type(v) == tuple:
-                dd[k] = XX.List.ListHelper.decodeV((list(v), coding))
+                dd[k] = XX.List.ListHelper.ListHelper.decode_v((list(v), coding))
             else:
                 dd[k] = v
         return dd

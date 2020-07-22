@@ -5,15 +5,16 @@ import time
 import traceback
 from typing import Union
 
-import XX.Encrypt.EncryptHelper as enc
-import XX.File.FileHelper as Fh
 import happybase
-from XX.Date.DatetimeHelper import get_today
-from XX.HTML.UrlHelper import UrlHelper as Uh
-from XX.Log.LogHelper import *
 from logzero import logger
 from scrapy.http import Request
 from scrapy.http import TextResponse, Response
+
+import XX.Encrypt.EncryptHelper as enc
+import XX.File.FileHelper as Fh
+from XX.Date.DatetimeHelper import get_today
+from XX.HTML.UrlHelper import UrlHelper as Uh
+from XX.Log.LogHelper import *
 
 process_request_type = Union[None, Response, Request]
 process_response_type = Union[Response, Request]
@@ -126,7 +127,8 @@ class CacheFileRequest(object):
             cf.FileHelper.mkdir(cf.FileHelper.get_file_path_and_name(cache_file_path)[0])
             try:
                 if should_write_cache(request, spider):
-                    del response.certificate
+                    if hasattr(response, "certificate"):
+                        del response.certificate
                     pickle.dump(response, open(cache_file_path, "wb"))
                     logger.info(f"===Write cache===      {cache_file_path}   {request.url}")
                 # else:

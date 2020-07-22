@@ -8,11 +8,11 @@ class ListHelper:
         ll = []
         for v in d:
             if type(v) == list or type(v) == tuple:
-                ll.append(ListHelper.decodeV(list(v), coding))
+                ll.append(ListHelper.decode_v(list(v), coding))
             elif type(v) == bytes:
                 ll.append(v.decode(coding))
             elif type(v) == dict:
-                ll.append(XX.Dict.DictHelper.DictHelper.decodeV(v, coding))
+                ll.append(XX.Dict.DictHelper.DictHelper.decode_v(v, coding))
             else:
                 ll.append(v)
         return ll

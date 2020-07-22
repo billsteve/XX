@@ -185,3 +185,16 @@ def make_insert_sql(table: str, data: dict, updates: dict, replace=1) -> str:
     if len(updates_sql) > 2:
         updates_sql = updates_sql[:-2]
     return f"INSERT INTO `{table}`( {columns_sql} )VALUES({values_sql}) ON DUPLICATE KEY UPDATE {updates_sql} ;\t"
+
+
+def make_update_sql(table: str, data: dict, updates: dict, replace=1) -> str:
+    sql = f"UPDATE `{table}` SET "
+    update_ = ''
+    for k, v in data.items():
+        if replace:
+            update_ += f",{k.strip()}='{pymysql.escape_string(v)}' "
+        else:
+            update_ += f",{k.strip()}=CASE WHEN {k}  IS NOT NULL THEN {k} ELSE '{pymysql.escape_string(v)}' END "
+    update_ = update_.lstrip(",")
+    sql += update_ + f" WHERE id = {data['id']}"
+    return sql
