@@ -55,11 +55,12 @@ class CacheFileRequest(object):
                 if exclude:
                     if self.cache_file_exclude_ts >= 0:
 
-                        if time.time() - Fh.FileHelper.get_create_ts(cache_file_path) < self.cache_file_exclude_ts:
+                        if time.time() - Fh.FileHelper.get_update_ts(cache_file_path) < self.cache_file_exclude_ts:
                             return True
                         else:
                             logger.debug(
-                                f"缓存文件过期。不读取。{cache_file_path}{Fh.FileHelper.get_create_ts(cache_file_path)}  {request.url}")
+                                f"缓存文件过期。不读取。{cache_file_path}{Fh.FileHelper.get_update_ts(cache_file_path)}  {request.url}")
+                            print(Fh.FileHelper.get_update_ts(cache_file_path))
                             return False
                     # 排除URL无过期时间,就是排除URL都不读缓存
                     else:
@@ -69,7 +70,7 @@ class CacheFileRequest(object):
                     # 全部时间
                     if self.cache_file_ts:
                         # 全部URL 没有过期
-                        if time.time() - Fh.FileHelper.get_create_ts(cache_file_path) < self.cache_file_ts:
+                        if time.time() - Fh.FileHelper.get_update_ts(cache_file_path) < self.cache_file_ts:
                             return True
                         else:
                             logger.debug(f"不是排除请求，但是缓存文件过期，不读缓存。{request.url}")
@@ -77,7 +78,7 @@ class CacheFileRequest(object):
                     else:
                         return True
             else:
-                # logger.debug(f"缓存文件不存在。 {request.url}")
+                logger.debug(f"缓存文件不存在。 {request.url}")
                 return False
 
         if should_read_cache(request, spider):
@@ -105,22 +106,22 @@ class CacheFileRequest(object):
             if exists_file:
                 if exclude:
                     if self.cache_file_exclude_ts:
-                        if time.time() - Fh.FileHelper.get_create_ts(cache_file_path) > self.cache_file_exclude_ts:
+                        if time.time() - Fh.FileHelper.get_update_ts(cache_file_path) > self.cache_file_exclude_ts:
                             logger.debug(
-                                f"排除缓存文件过期。需要重写。{cache_file_path}{Fh.FileHelper.get_create_ts(cache_file_path)}  {request.url}")
+                                f"排除缓存文件过期。需要重写。{cache_file_path}{Fh.FileHelper.get_update_ts(cache_file_path)}  {request.url}")
                             return True
                         else:
                             logger.debug(
-                                f"排除的URL没过期，不重写。过了{time.time() - Fh.FileHelper.get_create_ts(cache_file_path)} 秒？ {cache_file_path}")
+                                f"排除的URL没过期，不重写。过了{time.time() - Fh.FileHelper.get_update_ts(cache_file_path)} 秒？ {cache_file_path}")
                             return False
                     else:
                         logger.debug(f"排除URL没设置过期时间 都要重写。 {cache_file_path}")
                         return True
                 else:
-                    # logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
+                    logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
                     return False
             else:
-                # logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
+                logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
                 return True
 
         if response.status < 300:
@@ -129,6 +130,7 @@ class CacheFileRequest(object):
                 if should_write_cache(request, spider):
                     if hasattr(response, "certificate"):
                         del response.certificate
+                    res = Fh.FileHelper.remove_file(cache_file_path)
                     pickle.dump(response, open(cache_file_path, "wb"))
                     logger.info(f"===Write cache===      {cache_file_path}   {request.url}")
                 # else:
@@ -281,67 +283,6 @@ class CacheRedisRequest(object):
         return response
 
 
-# # HBASE缓存下载中间件
-# class CacheHBaseRequest(object):
-#     @classmethod
-#     def from_crawler(cls, crawler):
-#         settings = crawler.settings
-#         cls.settings = settings
-#         return cls()
-#
-#     def __init__(self):
-#         transport = TSocket.TSocket(self.settings.get("HBASE_HOST", "localhost"), self.settings.get("HBASE_PORT", 9090))
-#         transport.open()
-#         self.protocol = TBinaryProtocol.TBinaryProtocol(transport)
-#         self.client = Hbase.Client(self.protocol)
-#
-#         # 判断是否有表，没有则生成
-#         tables = self.client.getTableNames()
-#         self.table_name = "crawl_" + self.settings.get("PROJECT_NAME", "crawl")
-#         if self.table_name not in tables:
-#             source = ColumnDescriptor(name='source')
-#             data = ColumnDescriptor(name='data')
-#             self.client.createTable(self.table_name, [source, data])
-#             print("Create_table" + "===" * 10)
-#
-#     # 读取缓存
-#     def getCacheResult(self, request, spider):
-#         columns = ["source:url", "source:html", "source:status_code", "source:size"]
-#         result = self.client.getRowWithColumns(self.table_name, spider.name + "_" + enc.Encrypt.md5(request.url), columns)
-#         if result:
-#             if time.time() - result[0].columns.get('source:html').timestamp // 1000 <= int(self.settings.get("HBASE_EXPIRE_TS", 0)):
-#                 return result
-#         return None
-#
-#     # 读缓存，生成response
-#     def process_request(self, request, spider) -> process_request_type:
-#         result = self.getCacheResult(request, spider)
-#         if result:
-#             logger.info("Read response from hbase" + ">>>\t" + request.url)
-#             col = result[0].columns
-#             encoding = col.get('source:encoding').value if col.get('source:encoding') else "utf-8"
-#             return TextResponse(url=col.get('source:url').value, body=col.get('source:html').value, status=col.get('source:status_code').value, encoding=encoding)
-#
-#     # 写缓存到HBASE
-#     def process_response(self, request, response, spider) -> process_response_type:
-#         if not self.getCacheResult(request, spider):
-#             if response.status == 200:
-#                 row = spider.name + "_" + enc.Encrypt.md5(response.url)
-#                 mutations = list()
-#                 mutations.append(Mutation(column="source:url", value=str(response.url)))
-#                 mutations.append(Mutation(column="source:status_code", value=str(response.status)))
-#                 mutations.append(Mutation(column="source:html", value=str(response.text)))
-#                 mutations.append(Mutation(column="source:type", value="html"))
-#                 mutations.append(Mutation(column="source:size", value=str(len(response.text))))
-#                 mutations.append(Mutation(column="source:encoding", value=response.encoding))
-#                 self.client.mutateRow(self.table_name, row, mutations)
-#                 logger.info("Cache response 2 hbase" + "<<<\t" + response.url)
-#             else:
-#                 logger.info("Not 200" + "---\t" + response.url)
-#         return response
-
-
-# HBASE缓存下载中间件
 class CacheHappyBaseRequest(object):
     @classmethod
     def from_crawler(cls, crawler):
