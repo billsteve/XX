@@ -5,16 +5,15 @@ import time
 import traceback
 from typing import Union
 
-import happybase
-from logzero import logger
-from scrapy.http import Request
-from scrapy.http import TextResponse, Response
-
 import XX.Encrypt.EncryptHelper as enc
 import XX.File.FileHelper as Fh
+import happybase
 from XX.Date.DatetimeHelper import get_today
 from XX.HTML.UrlHelper import UrlHelper as Uh
 from XX.Log.LogHelper import *
+from logzero import logger
+from scrapy.http import Request
+from scrapy.http import TextResponse, Response
 
 process_request_type = Union[None, Response, Request]
 process_response_type = Union[Response, Request]
@@ -26,9 +25,17 @@ class CacheFileRequest(object):
     def get_cache_file(*args, **kwargs):
         spider = kwargs.get("spider")
         url = kwargs.get("url")
+        request = kwargs.get("request", {})
+        method = "get"
+        if request:
+            method = request.method
+            body = request.body.decode("utf-8")
         root_path_cache = kwargs.get("root_path_cache", "./")
         spider = spider if spider else Uh.get_domain(url).replace(".", "_")
-        return root_path_cache + spider + os.sep + Fh.FileHelper.get_md5_name(url) + ".cache"
+        if method.lower() == "post":
+            return root_path_cache + spider + os.sep + Fh.FileHelper.get_md5_name(url + "_" + body) + ".cache"
+        else:
+            return root_path_cache + spider + os.sep + Fh.FileHelper.get_md5_name(url) + ".cache"
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -42,8 +49,10 @@ class CacheFileRequest(object):
         return cls()
 
     def process_request(self, request, spider) -> process_request_type:
-        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name),
-                                                    root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
+        cache_file_path = self.cache_file_path_func(
+            url=str(request.url), spider=str(spider.name),
+            root_path_cache=self.settings.get("ROOT_PATH_CACHE"),
+            request=request)
 
         # 是否应该读缓存
         def should_read_cache(request, spider) -> bool:
@@ -60,7 +69,6 @@ class CacheFileRequest(object):
                         else:
                             logger.debug(
                                 f"缓存文件过期。不读取。{cache_file_path}{Fh.FileHelper.get_update_ts(cache_file_path)}  {request.url}")
-                            print(Fh.FileHelper.get_update_ts(cache_file_path))
                             return False
                     # 排除URL无过期时间,就是排除URL都不读缓存
                     else:
@@ -96,8 +104,10 @@ class CacheFileRequest(object):
 
     # 写文件缓存
     def process_response(self, request, response, spider) -> process_response_type:
-        cache_file_path = self.cache_file_path_func(url=str(request.url), spider=str(spider.name),
-                                                    root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
+        cache_file_path = self.cache_file_path_func(
+            url=str(request.url), spider=str(spider.name),
+            root_path_cache=self.settings.get("ROOT_PATH_CACHE"),
+            request=request)
 
         # 是否应该重写缓存
         def should_write_cache(request, spider) -> bool:
@@ -118,7 +128,7 @@ class CacheFileRequest(object):
                         logger.debug(f"排除URL没设置过期时间 都要重写。 {cache_file_path}")
                         return True
                 else:
-                    logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
+                    # logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
                     return False
             else:
                 logger.debug(f"缓存文件不存在。写缓存。 {request.url}")

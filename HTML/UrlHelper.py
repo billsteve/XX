@@ -97,7 +97,7 @@ class UrlHelper:
         params = UrlHelper.get_params(url.split("#")[0])
         main_url = UrlHelper.get_without_params(url)
         params = dict(params, **d)
-        d = h_dict.DictHelper.sortedDictKey(params)
+        d = h_dict.DictHelper.sorted_dict_key(params)
         params_str = ""
         for k, v in d.items():
             params_str += "&" + str(k) + "=" + str(v)

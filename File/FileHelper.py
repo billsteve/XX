@@ -63,6 +63,23 @@ class FileHelper(object):
             return
 
     @staticmethod
+    def remove_dir(file_path):
+        if not file_path:
+            return
+        file_path = file_path.strip()
+        file_path = file_path.rstrip("\\")
+        file_path = file_path.rstrip("/")
+        isExists = os.path.exists(file_path)
+        if isExists:
+            try:
+                shutil.rmtree(file_path)
+            except:
+                traceback.print_exc()
+                return
+        return True
+
+
+    @staticmethod
     def mkdir(file_path):
         if not file_path:
             return
