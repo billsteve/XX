@@ -59,7 +59,7 @@ class BloomFilter(object):
 
 if __name__ == '__main__':
     """ 第一次运行时会显示 not exists!，之后再运行会显示 exists! """
-    from XX.DB.RedisHelper import *
+    from .DB.RedisHelper import *
 
     conn_redis = RedisHelper.get_redis_connect("localhost", pwd=None, db=0)
     bf = BloomFilter(conn_redis)

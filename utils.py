@@ -3,10 +3,18 @@
 import hashlib
 import os
 
-from .Date.DatetimeHelper import *
+from .File.FileHelper import FileHelper as Fh
+from .HTTP.RequestsHelper import RequestHelper as Req
 from logzero import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from .Date.DatetimeHelper import *
+
+
+def downloader(url, root_path=None, del_cache_out_ts=None, **kwargs):
+    save_path = f"{root_path}{Fh.get_md5_name(url)}.pickle" if root_path else None
+    return Req.send_cache_request(url, save_path=save_path, del_cache_out_ts=del_cache_out_ts, **kwargs)
 
 
 def get_session(host="localhost", user="root", password="123456", port="3306", charset="utf-8", db="test", *arg, **kw):

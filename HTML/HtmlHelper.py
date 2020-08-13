@@ -4,20 +4,23 @@ import traceback
 import urllib.parse
 
 
-def urlParse(k):
+def url_parse(k):
     return urllib.parse.unquote(str(k))
 
 
-def urlEncode(k):
+def url_encode(k):
     return urllib.parse.quote(str(k))
 
 
-def parseDict(item):
+# ??
+def parse_dict(item):
     for k in item:
         if isinstance(item[k], str):
-            item[k] = urlParse(item[k])
+            item[k] = item[k]
         elif isinstance(item[k], dict):
-            item[k] = parseDict(item[k])
+            item[k] = parse_dict(item[k])
+        elif isinstance(item[k], list):
+            item[k] = parse_dict(item[k])
     return item
 
 
