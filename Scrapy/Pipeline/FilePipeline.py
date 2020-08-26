@@ -19,7 +19,7 @@ class FilePipeline(object):
 
     def process_item(self, item, spider):
         # 数据处理
-        item = chtml.parseDict(dict(item))
+        item = chtml.parse_dict(dict(item))
         today = time.strftime("%Y_%m_%d", time.localtime(int(time.time())))
         json_str = json.dumps(item, ensure_ascii=False)
 
