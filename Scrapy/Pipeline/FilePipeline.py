@@ -21,7 +21,7 @@ class FilePipeline(object):
         # 数据处理
         # item = chtml.parse_dict(dict(item))
         today = time.strftime("%Y_%m_%d", time.localtime(int(time.time())))
-        json_str = json.dumps(item, ensure_ascii=False)
+        json_str = json.dumps(dict(item), ensure_ascii=False)
 
         # 保存数据到文件
         file_path = FilePipeline.settings.get("ROOT_PATH_JSON") + "json" + os.sep + spider.name + os.sep + today + ".json"

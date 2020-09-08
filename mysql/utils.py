@@ -1,20 +1,12 @@
-#!/usr/bin/python3
-# -*- coding:utf-8 -*-
-import hashlib
-import os
-
-from .File.FileHelper import FileHelper as Fh
-from .HTTP.RequestsHelper import RequestHelper as Req
+# -*- coding: utf-8 -*-
+import pymysql
 from logzero import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from .Date.DatetimeHelper import *
+from XX.Date.DatetimeHelper import get_now_time
 
-
-def downloader(url, root_path=None, del_cache_out_ts=None, **kwargs):
-    save_path = f"{root_path}{Fh.get_md5_name(url)}.pickle" if root_path else None
-    return Req.send_cache_request(url, save_path=save_path, del_cache_out_ts=del_cache_out_ts, **kwargs)
+global_conn = None
 
 
 def get_session(host="localhost", user="root", password="123456", port="3306", charset="utf-8", db="test", *arg, **kw):
@@ -28,24 +20,6 @@ def get_session(host="localhost", user="root", password="123456", port="3306", c
         engine = create_engine(mysql_url, encoding="utf8", *arg, **kw)
         session = sessionmaker(bind=engine)()
         return session
-
-
-def get_md5_name(hash_string):
-    md5_str = hashlib.new("md5", hash_string.encode("utf-8")).hexdigest()
-    return md5_str[0] + os.sep + md5_str[1] + os.sep + md5_str[2] + os.sep + md5_str
-
-
-def writefile(filename, text, mode="w"):
-    f = open(filename, mode, encoding="UTF-8")
-    f.write(text)
-    f.close()
-    pass
-
-
-####################################################
-import pymysql
-
-global_conn = None
 
 
 def connect(host="localhost", user="root", password="123456", port=3306, charset="utf8", db="test",
@@ -97,16 +71,16 @@ def insert(conn, sql):
         conn.ping()
         cur = conn.cursor()
         cur.execute(sql)
-        id = int(conn.insert_id())
+        id_ = int(conn.insert_id())
         conn.commit()
     except Exception as e:
         logger.info("Mysql Insert Error: %s, %s" % (e, sql))
         logger.info("data insert error")
         conn.rollback()
-        id = -1
+        id_ = -1
     finally:
         cur.close()
-    return id
+    return id_
 
 
 def lastrowid(conn):
@@ -115,13 +89,13 @@ def lastrowid(conn):
     try:
         conn.ping()
         cur = conn.cursor()
-        id = int(cur.lastrowid)
+        id_ = int(cur.lastrowid)
     except Exception as e:
         logger.info("data last_id error,%s" % e)
-        id = -1
+        id_ = -1
     finally:
         cur.close()
-    return id
+    return id_
 
 
 def update(conn, sql):
@@ -134,7 +108,7 @@ def update(conn, sql):
         conn.commit()
     except Exception as e:
         logger.info(f" ========== Mysql Update Error: {e}  sql :  {sql}")
-        writefile("mysql-err.log", get_now_time() + sql + "\n\n\n", mode="a")
+        open("mysql-err.log", "a", encoding="utf-8").write(get_now_time() + sql + "\n")
         conn.ping()
         conn.rollback()
         result = False
@@ -148,16 +122,16 @@ def fetch(conn, sql):
         conn.ping()
         cur = conn.cursor(pymysql.cursors.DictCursor)
         rs = cur.execute(sql)
-        list = cur.fetchmany(rs)
+        rows = cur.fetchmany(rs)
         conn.commit()
     except Exception as e:
         logger.info(f"Mysql Fetch Error: {e}\n{sql}")
         conn.rollback()
         conn.ping()
-        list = None
+        rows = None
     finally:
         cur.close()
-    return list
+    return rows
 
 
 def make_insert_sql(table: str, data: dict, updates: dict, replace=1) -> str:
@@ -184,7 +158,8 @@ def make_insert_sql(table: str, data: dict, updates: dict, replace=1) -> str:
             # 补充
             if key in updates:
                 if data[key]:
-                    updates_sql = updates_sql + "`" + key + f"` =  CASE WHEN {key}  IS NOT NULL THEN {key} ELSE '" + str(
+                    updates_sql = updates_sql + "`" + key \
+                                  + f"` =  CASE WHEN {key}  IS NOT NULL THEN {key} ELSE '" + str(
                         data[key]) + "'  END,\t"
 
     columns_sql = columns_sql[:-2]

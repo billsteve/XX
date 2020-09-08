@@ -9,6 +9,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import XX.Encrypt.EncryptHelper as Enc
 import XX.String.StringHelper as String
 from XX.File.FileHelper import *
+from XX.File.FileHelper import FileHelper as Fh
 from XX.Model.Object.ResponseObj import *
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -201,6 +202,11 @@ def cache_response(response, roo_path=None):
         FileHelper.mkdir(FileHelper.get_file_path_and_name(fp)[0])
         pickle.dump(response, open(fp, "wb"))
     return 1
+
+
+def downloader(url, root_path=None, del_cache_out_ts=None, **kwargs):
+    save_path = f"{root_path}{Fh.get_md5_name(url)}.pickle" if root_path else None
+    return RequestHelper.send_cache_request(url, save_path=save_path, del_cache_out_ts=del_cache_out_ts, **kwargs)
 
 
 if __name__ == "__main__":

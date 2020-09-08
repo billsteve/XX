@@ -12,11 +12,11 @@ def url_encode(k):
     return urllib.parse.quote(str(k))
 
 
-# ??
+# 给不能dump的字段，该为能dump
 def parse_dict(item):
     for k in item:
         if isinstance(item[k], str):
-            item[k] = item[k]
+            pass
         elif isinstance(item[k], dict):
             item[k] = parse_dict(item[k])
         elif isinstance(item[k], list):

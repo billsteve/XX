@@ -8,6 +8,7 @@ from logzero import logger
 import XX.DB.RedisHelper as Rh
 
 
+# redisIP池代理
 class IPPollingProxy(object):
     # ping from all province, then get cdn ip
     proxy_cdn = []
@@ -27,23 +28,10 @@ class IPPollingProxy(object):
         proxy_ip = random.choice(self.proxy)
         if proxy_ip:
             request.meta['proxy'] = "http://" + proxy_ip
-        # 验证代理用户名和密码
-        # proxy_user_pass = "USERNAME:PASSWORD"
-        # setup basic authentication for the proxy
-        # encoded_user_pass = base64.encodestring(proxy_user_pass)
-        # request.headers['Proxy-Authorization'] = 'Basic ' + encoded_user_pass
-        # 根据国内国外ip确定启动哪一组代理池
-        # ip发送到ping.chinaz.com查询地址
-        # 根据地址来判断启动代理池
-        # if u'国内' in area:
-        #     request.meta['proxy'] = '这里设置国内http代理'
-        # elif u'国外' in area:
-        #     request.meta['proxy'] = '这里设置国外http代理'
-        # else:
-        #     pass
         return
 
 
+# 阿布云代理
 class AbuyunProxy(object):
 
     @classmethod
