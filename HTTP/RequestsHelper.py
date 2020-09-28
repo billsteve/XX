@@ -40,8 +40,11 @@ class RequestHelper(object):
                 response.msg = f"unsupported method : {method}."
                 response.method = method
                 return response
+            # logger.debug("start request")
+            print(url, data, cookies, proxies, timeout, verify, allow_redirects, json_)
             request = func(url, data=data, headers=headers, cookies=cookies, proxies=proxies,
                            timeout=timeout, verify=verify, allow_redirects=allow_redirects, json=json_)
+            logger.debug("end request")
             request.encoding = request.apparent_encoding
             response.status = response.status_code = request.status_code
             response.text = request.text
@@ -68,9 +71,11 @@ class RequestHelper(object):
             else:
                 response.msg = "Not normal status"
         except Exception as e:
-            traceback.print_exc()
+            # traceback.print_exc()
+            logger.debug(e)
             response.status = response.status_code = 0
             response.msg = f"Time out!  Exception : {e}"
+        logger.debug("end request")
         return response
 
     # 删除缓存，重新请求
@@ -79,10 +84,11 @@ class RequestHelper(object):
         # 写缓存
         if kw.get("save_path"):
             FileHelper.remove_file(kw.get("save_path"))
-            # logger.info("Delete old cache file ")
+            # logger.debug("Delete old cache file ")
         resp = RequestHelper.send_request(url, *arg, **kw)
-        if resp.status_code <= 300:
+        if resp.status_code < 300:
             try:
+                # logger.debug(f"Pickle cache file ")
                 FileHelper.mkdir(FileHelper.get_file_path_and_name(kw.get("save_path"))[0])
                 # 保存HTML
                 if kw.get("save_html"):
@@ -96,19 +102,19 @@ class RequestHelper(object):
                     if kw.get("save_path") and resp.text:
                         pickle.dump(resp, open(kw.get("save_path"), "wb"))
                     else:
-                        # logger.debug(f"Don't save. No HTML or no cache_path .Code is {resp.status_code}")
+                        logger.debug(f"Don't save. No HTML or no cache_path .Code is {resp.status_code}")
                         pass
                 return resp
             except Exception as e:
                 traceback.print_exc()
                 logger.debug("===Can't dump html file to >> " + str(kw.get("save_path")) + f"    {e}")
         else:
-            # logger.debug(f"Not 200:{resp.status_code}.  {url}")
+            logger.debug(f"Not 200:{resp.status_code}.  {url}")
             return resp
 
     # 缓存文件请求
     @staticmethod
-    def send_cache_request(url, *arg, **kw):
+    def send_cache_request(url, *arg, **kw) -> ResponseObj:
         resp = ResponseObj()
         del_cache_out_ts = kw["del_cache_out_ts"] if "del_cache_out_ts" in kw.keys() else None
 
@@ -126,6 +132,7 @@ class RequestHelper(object):
         # 存在，且不过期
         if kw.get("save_path") and os.path.isfile(kw.get("save_path")) and os.path.getsize(
                 kw.get("save_path")) and not out_time():
+            logger.debug("not out time")
             try:
                 if kw.get("serialization_type") == "json":
                     resp.__dict__ = dict(json.load(open(kw.get("save_path"), encoding="utf-8")))
@@ -145,6 +152,7 @@ class RequestHelper(object):
                 traceback.print_exc()
                 resp.msg = f"Failed to read cached content: {e}!"
         else:
+            # logger.debug("out time!")
             resp = RequestHelper.send_refresh_cache_request(url, *arg, **kw)
         return resp
 

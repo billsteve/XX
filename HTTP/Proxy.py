@@ -185,4 +185,5 @@ def get_proxy_by_ip(ip, port):
 get_abuyun_proxy = get_proxy
 
 if __name__ == '__main__':
-    headers = {}
+    r = requests.get("https://www.baidu.com", proxies=get_abuyun_proxy("HA3A8EO9732546PD", "BFCFE8CBAB2763F0"))
+    print(r.status_code)

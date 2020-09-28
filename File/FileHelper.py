@@ -78,7 +78,6 @@ class FileHelper(object):
                 return
         return True
 
-
     @staticmethod
     def mkdir(file_path):
         if not file_path:

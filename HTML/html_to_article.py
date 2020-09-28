@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # 从html中提取正文, 文本密度提取算法
 # update time: 20161014
-
-
 import re
 import traceback
 
 from lxml import etree
 from scrapy import Selector
+
+import XX.funclib as fun
 
 
 class GetNewsArticle(object):
@@ -39,11 +39,11 @@ class GetNewsArticle(object):
         # for 新浪新闻
         elif 'sina.com.cn' in self.url:
             for i in tree.xpath('//div[@id="artibody" or @id="articleContent" or @id="j_articleContent"]//p//text()'):
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
             if not self.article_content:
                 # ??
                 for i in tree.xpath('//div[@id="artibody" or @id="articleContent" or @id="j_articleContent"]//p'):
-                    self.article_content = self.article_content + cfun.clean_str_label(i.xpath("string(.)")) + '\n'
+                    self.article_content = self.article_content + fun.clean_str_label(i.xpath("string(.)")) + '\n'
 
         # for 搜狐新闻
         elif 'sohu.com' in self.url:
@@ -58,60 +58,63 @@ class GetNewsArticle(object):
         # for 汽车之家新闻
         elif 'autohome.com.cn' in self.url:
             # ??
-            for i in Selector(text=self.html).xpath('//div[@id="articleContent" or @class="dealertext" or @id="newsbody"]/p').extract():
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+            for i in Selector(text=self.html).xpath(
+                    '//div[@id="articleContent" or @class="dealertext" or @id="newsbody"]/p').extract():
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
 
         # for 车质网新闻
         elif '12365auto.com' in self.url:
             # ??
             for i in Selector(text=self.html).xpath('//div[@class="show" or @class="sp_new_show"]/p').extract():
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
 
         # for 易车网新闻
         elif 'bitauto.com' in self.url or 'yiche.com' in self.url:
             # ??
-            for i in Selector(text=self.html).xpath('//div[@class="text_box" or @id="openimg_articlecontent"]/p').extract():
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+            for i in Selector(text=self.html).xpath(
+                    '//div[@class="text_box" or @id="openimg_articlecontent"]/p').extract():
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
 
         # for 一点资讯
         elif 'yidianzixun.com' in self.url:
             for i in Selector(text=self.html).xpath('//div[@id="imedia-article" or @class="content-bd"]//p//text()'):
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
 
         # for 太平洋汽车
         elif 'pcauto.com.cn' in self.url:
             # ??
             for i in Selector(text=self.html).xpath('//div[@class="artText clearfix" or @class="artText"]/p').extract():
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
 
         # for 爱卡汽车 newsbody
         elif 'xcar.com.cn' in self.url:
             # ??
-            for i in Selector(text=self.html).xpath('//div[@id="newsbody" or @class="artical_player_wrap"]/p').extract():
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+            for i in Selector(text=self.html).xpath(
+                    '//div[@id="newsbody" or @class="artical_player_wrap"]/p').extract():
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
 
         # for 车讯网
         elif 'chexun.com' in self.url:
             # ??
             for i in Selector(text=self.html).xpath('//div[@class="news-editbox"]/p').extract():
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
 
         # for 买车网
         elif 'maiche.com' in self.url:
             # ??
             for i in Selector(text=self.html).xpath('//div[@class="content-left"]//div[@class="detail"]//p//text()'):
                 if i:
-                    self.article_content = self.article_content + cfun.clean_str_label(str(i)) + '\n'
+                    self.article_content = self.article_content + fun.clean_str_label(str(i)) + '\n'
 
         # for 凤凰网
         elif 'ifeng.com' in self.url:
             # ??
             for i in Selector(text=self.html).xpath('//div[@class="arl-c-txt"]/p').extract():
-                self.article_content = self.article_content + cfun.clean_str_label(i) + '\n'
+                self.article_content = self.article_content + fun.clean_str_label(i) + '\n'
         else:
             self.article_content = ''
 
-        self.article_content = cfun.clean_str_label(self.article_content)
+        self.article_content = fun.clean_str_label(self.article_content)
 
         if len(self.article_content) < 2:
             return False

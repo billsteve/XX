@@ -69,7 +69,7 @@ def insert(conn, sql):
     conn = global_conn if global_conn else conn
     try:
         conn.ping()
-        cur = conn.cursor()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
         cur.execute(sql)
         id_ = int(conn.insert_id())
         conn.commit()
@@ -128,7 +128,7 @@ def fetch(conn, sql):
         logger.info(f"Mysql Fetch Error: {e}\n{sql}")
         conn.rollback()
         conn.ping()
-        rows = None
+        rows = []
     finally:
         cur.close()
     return rows
