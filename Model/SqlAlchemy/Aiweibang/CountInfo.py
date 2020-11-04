@@ -1,11 +1,4 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time       : 2018/9/13 20:10
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : CountInfo.py
-# @Software : PyCharm
-# coding: utf-8
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from XX.Model.SqlAlchemy.BaseModel import BaseModel

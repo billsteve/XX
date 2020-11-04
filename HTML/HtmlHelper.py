@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import re
-import traceback
 import urllib.parse
 
 
@@ -31,24 +30,24 @@ def formatUrlToDict(url):
         values = url.split('?')[-1]
         if values:
             for key_value in values.split('&'):
-                if key_value.find("=")>=0:
+                if key_value.find("=") >= 0:
                     try:
                         res[key_value.split('=')[0]] = key_value.split('=')[1]
-                    except:
-                        traceback.print_exc()
-                        pass
-    except:
-        traceback.print_exc()
-        print(" === URL: " + str(url))
+                    except Exception as e:
+                        print(e)
+                        raise
+    except Exception as e:
+        print(e)
+        raise
     return res
 
 
 def delHtml(str1):
     str1 = str1.replace("<br />", "\n").replace("<br/>", "\n").replace("<br>", "\n").replace("<hr />", "\n")
-    return re.compile(r'<[^>]+>', re.S).sub('', str(str1)) if str1 else ""
+    return re.compile(r"<[^>]+>", re.S).sub('', str(str1)) if str1 else ""
 
 
-def decodeUrl(url):
+def decode_url(url):
     import urllib.parse
     return urllib.parse.unquote(url)
 
@@ -63,7 +62,7 @@ def delStr(from_str, start_str, end_str):
             from_str1 = from_str[:s_index - 1]
             from_str2 = from_str[e_index + 1:]
             from_str = from_str1 + from_str2
-            return cutStr(from_str, start_str, end_str)
+            return cut_str(from_str, start_str, end_str)
         else:
             return from_str
     else:
@@ -71,7 +70,7 @@ def delStr(from_str, start_str, end_str):
 
 
 # 切割字符串
-def cutStr(from_str, start_str, end_str):
+def cut_str(from_str, start_str, end_str):
     s_index = from_str.find(start_str)
     if s_index > 0:
         s_index = len(start_str) + s_index
@@ -83,7 +82,7 @@ def cutStr(from_str, start_str, end_str):
     return ""
 
 
-def getCookiesFromList(l):
+def get_cookies_from_list(l):
     # l = ['BDORZ=27315; max-age=86400; domain=.baidu.com; path=/','BDORZ2=27315; max-age=86400; domain=.baidu.com; path=/']
     cookies = {}
     for cookie in l:
@@ -93,7 +92,7 @@ def getCookiesFromList(l):
     return cookies
 
 
-def getCookieFromStr(cookie):
+def get_cookie_from_str(cookie):
     lines = cookie.split(";")
     cookies = {}
     for line in lines:
@@ -103,23 +102,23 @@ def getCookieFromStr(cookie):
     return cookies
 
 
-def getHeaderFromLineStr(headers):
+def get_header_from_line_str(headers):
     return {each.split(':', 1)[0].strip(): each.split(':', 1)[1].strip() for each in headers.split('\n') if
             each.split()}
 
 
 # 获取字符串中的数字
-def getNumFromStr(msg):
+def get_num_from_str(msg):
     if isinstance(msg, str):
         return re.findall(r"\d+", str(msg))
     elif isinstance(msg, bytes):
-        return re.findall(r"\d+", str(msg.encode("utf-8")))
+        return re.findall(r"\d+", str(msg.decode("utf-8")))
     else:
         return msg
 
 
 #  获取文本中的电话
-def getTel(text):
+def get_tel(text):
     tel = re.findall(r"\(?0\d{2,3}[) -]?\d{7,9}-\d{0,8}", text)
     if tel:
         return tel[0]
@@ -130,7 +129,7 @@ def getTel(text):
         return
 
 
-def tff2Unicode():  # 将字体映射为unicode列表
+def tff2_unicode():  # 将字体映射为unicode列表
     filename = '/home/jason/workspace/1.ttf'
     fnt = fontforge.open(filename)
     for i in fnt.glyphs():

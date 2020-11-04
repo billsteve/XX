@@ -1,11 +1,4 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time       : 2018/9/13 19:18
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : ReadNum.py
-# @Software : PyCharm
-# coding: utf-8
 from sqlalchemy import Column, Integer, String, Index
 from sqlalchemy.ext.declarative import declarative_base
 from XX.Model.SqlAlchemy.BaseModel import BaseModel

@@ -27,13 +27,6 @@ def bytes2str(l):
         return l
 
 
-def str2int(s):
-    try:
-        return int(s)
-    except:
-        return
-
-
 # 获取字符的数量
 def get_letter_count(s):
     num = 0

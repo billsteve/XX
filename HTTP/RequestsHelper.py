@@ -41,10 +41,9 @@ class RequestHelper(object):
                 response.method = method
                 return response
             # logger.debug("start request")
-            print(url, data, cookies, proxies, timeout, verify, allow_redirects, json_)
             request = func(url, data=data, headers=headers, cookies=cookies, proxies=proxies,
                            timeout=timeout, verify=verify, allow_redirects=allow_redirects, json=json_)
-            logger.debug("end request")
+            # logger.debug("end request")
             request.encoding = request.apparent_encoding
             response.status = response.status_code = request.status_code
             response.text = request.text
@@ -75,7 +74,7 @@ class RequestHelper(object):
             logger.debug(e)
             response.status = response.status_code = 0
             response.msg = f"Time out!  Exception : {e}"
-        logger.debug("end request")
+        # logger.debug("end request")
         return response
 
     # 删除缓存，重新请求

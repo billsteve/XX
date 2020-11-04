@@ -32,7 +32,7 @@ class UrlHelper:
     @staticmethod
     def get_domain(url):
         url = UrlHelper.add_schema(url)
-        return urlparse(url).hostname.strip()
+        return urlparse(url).hostname
 
     # 获取父域名
     @staticmethod

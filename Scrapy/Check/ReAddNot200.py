@@ -13,12 +13,12 @@ from logzero import logger
 
 
 # @deprecated
-def re_add_not200(rcfg=RC.ali2_cfg(db=0), ts=10):
-    conn_redis = RedisHelper.get_redis_connect_by_cfg(rcfg)
+def re_add_not200(redis_cfg=RC.ali2_cfg(db=0), ts=10):
+    conn_redis = RedisHelper.get_redis_connect_by_cfg(redis_cfg)
     while 1:
         keys = conn_redis.keys("*not200*")
         if not keys:
-            BF.print_from_head("No More not 200 Spider in " + str(rcfg["host"]), ts=ts)
+            BF.print_from_head("No More not 200 Spider in " + str(redis_cfg["host"]), ts=ts)
             continue
         for key in keys:
             url = conn_redis.spop(key)

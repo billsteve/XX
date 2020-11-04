@@ -26,7 +26,7 @@ class DictHelper():
             if isinstance(k, bytes):
                 k = k.decode(coding)
             if type(v) == dict:
-                dd[k] = DictHelper.decodeV(v, coding)
+                dd[k] = DictHelper.decode_v(v, coding)
             elif type(v) == bytes:
                 dd[k] = str(v.decode(coding))
             elif type(v) == list or type(v) == tuple:
@@ -38,14 +38,14 @@ class DictHelper():
     @staticmethod
     def list_dict_duplicate_removal(data_list, key):
         v_sets = set()
-        l = []
+        res = []
         for d in data_list:
             for k, v in d.items():
                 if k == key:
                     if v not in v_sets:
                         v_sets.add(v)
-                        l.append(d)
-        return l
+                        res.append(d)
+        return res
 
 
 if __name__ == "__main__":
@@ -1643,6 +1643,6 @@ if __name__ == "__main__":
             "kind": "色情"
         }
     ]
-    d = DictHelper.list_dict_duplicate_removal(l, "word")
-    print(len(l), len(d))
+    _ = DictHelper.list_dict_duplicate_removal(l, "word")
+    print(len(l), len(_))
     pass

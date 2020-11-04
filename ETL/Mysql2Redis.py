@@ -1,10 +1,4 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time         : 2019/1/17 11:09
-# @File           : Mysql2Redis
-# @Des           : 
-# @Email        : billsteve@126.com
-# -*- coding:utf-8 -*-
 import time
 import traceback
 
@@ -36,53 +30,45 @@ def get_key_type(key1):
 
 def get_key_value(key, r):
     keyType = get_key_type(key)
-    try:
-        if keyType == "list":
-            return r.lpop(key)
-        elif keyType == "set":
-            return r.spop(key)
-        elif keyType == "kv":
-            return r.get(key)
-        elif keyType == "zset":
-            return r.zrange(key, 0, 1)
-        elif keyType == "hash":
-            return r.hget(key)
-        else:
-            return None
-    except:
+    if keyType == "list":
+        return r.lpop(key)
+    elif keyType == "set":
+        return r.spop(key)
+    elif keyType == "kv":
+        return r.get(key)
+    elif keyType == "zset":
+        return r.zrange(key, 0, 1)
+    elif keyType == "hash":
+        return r.hget(key)
+    else:
         return None
 
 
 def set_key_value(key, val, r, *arg, **kw):
     keyType = get_key_type(key)
-    try:
-        if keyType == "list":
-            return r.rpush(key, val)
-        elif keyType == "set":
-            return r.sadd(key, val)
-        elif keyType == "kv":
-            return r.set(key, val)
-        elif keyType == "zset":
-            if kw.get("score"):
-                return r.zset(key, val, kw.get("score"))
-            return
-        elif keyType == "hash":
-            return r.hset(key, val)
-        else:
-            print(" Not allowled keyType " + key)
-            return None
-    except:
-        traceback.print_exc()
+    if keyType == "list":
+        return r.rpush(key, val)
+    elif keyType == "set":
+        return r.sadd(key, val)
+    elif keyType == "kv":
+        return r.set(key, val)
+    elif keyType == "zset":
+        if kw.get("score"):
+            return r.zset(key, val, kw.get("score"))
+        return
+    elif keyType == "hash":
+        return r.hset(key, val)
+    else:
+        print(" Not allowed keyType " + key)
         return None
-    pass
 
 
 # DB 2 Redis
 class Table2Redis():
     def __init__(self, *argvs, **kw):
-        self.db = kw.get("mcfg", {}).get("db")
-        self.ConnRedis = RH.RedisHelper.getRedisConnectByCfg(kw.get("rcfg"))
-        self.ConnMysql = MH.MysqlHelper(**kw.get("mcfg"))
+        self.db = kw.get("mysql_cfg", {}).get("db")
+        self.ConnRedis = RH.RedisHelper.get_redis_connect_by_cfg(kw.get("redis_cfg"))
+        self.ConnMysql = MH.MysqlHelper(**kw.get("mysql_cfg"))
 
     # 把某一列加到redis中:
     # TODO: add zset hash other.......设计其他的类型
@@ -156,7 +142,7 @@ class Table2Redis():
                     elif key_type == "kv":
                         res = self.ConnRedis.set(key[1], key[2])
                     else:
-                        logger.debug("????")
+                        logger.error(f"key_type is not support : {key_type}")
                     if res and exists_set_name:
                         self.ConnRedis.sadd(exists_set_name, key[1])
                     self.ConnRedis.set(from_id_key, k_ADDREDIS_FROM_ID)
@@ -205,7 +191,8 @@ class Redis2File():
     def __init__(self, Host="localhost", db=0, *arg, **kw):
         self.r = redis.Redis(Host, db=db, decode_responses=True)
 
-    def r_2_file(self, key, FilePath, ExistsSetName=None, Total=0, KeyFilter=None, DeleteSource=True, ts=0, LineEnd="", *arg, **kw):
+    def r_2_file(self, key, FilePath, ExistsSetName=None, Total=0, KeyFilter=None, DeleteSource=True, ts=0, LineEnd="",
+                 *arg, **kw):
         Total = Total if not DeleteSource and Total else Total if DeleteSource else 1000
         val = 1
         num = 0
@@ -215,9 +202,9 @@ class Redis2File():
             try:
                 if val:
                     if ExistsSetName:
-                        if not self.r2.sadd(ExistsSetName, val):
+                        if not self.r.sadd(ExistsSetName, val):
                             continue
-                    if FH.FileHelper.saveFile(FilePath, str(val)):
+                    if FH.FileHelper.save_file(FilePath, str(val)):
                         if not DeleteSource:
                             set_key_value(key, val, self.r)
                         print("ok  =  " + str(num))
@@ -266,5 +253,5 @@ if __name__ == "__main__":
     import XX.Model.Struct.MysqlConn as MC
     import XX.Model.Struct.RedisConn as RC
 
-    t2r = Table2Redis(mcfg=MC.qq_cfg(db="weibo"), rcfg=RC.ali_cfg(db=4))
-    t2r.ColumnToRedis("weibo_info", "web_id", "s_crawled_wb_web_id", "set", limit=10, kv=False)
+    t2r = Table2Redis(mysql_cfg=MC.qq_cfg(db="weibo"), redis_cfg=RC.ali_cfg(db=4))
+    t2r.column_to_redis("weibo_info", "web_id", "s_crawled_wb_web_id", "set", limit=10, kv=False)

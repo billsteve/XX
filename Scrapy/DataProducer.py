@@ -32,12 +32,12 @@ class DataProducer:
 class JsonFileProducer(DataProducer):
     @staticmethod
     def json_2_redis(*args, **kw):
-        rcfg = kw.get("rcfg")
-        if not rcfg:
-            print("No rcfg" + "===" * 10)
+        redis_cfg = kw.get("redis_cfg")
+        if not redis_cfg:
+            print("No redis_cfg" + "===" * 10)
             return
         rename = kw.get("rename", 0)
-        conn_redis = dr.RedisHelper.get_redis_connect_by_cfg(rcfg)
+        conn_redis = dr.RedisHelper.get_redis_connect_by_cfg(redis_cfg)
         fp = kw.get("fp", "")
         ts = kw.get("ts", 1)
         spider = kw.get("spider")
@@ -89,8 +89,8 @@ class JsonFile2HBase(JsonFileProducer):
             print("No fp")
 
 
-def json_file_line_2_redis(fp, spider, rcfg, fn, rename=1, ts=10):
-    JsonFileProducer.json_2_redis(fp, spider, rcfg, fn, rename=1, ts=10)
+def json_file_line_2_redis(fp, spider, redis_cfg, fn, rename=1, ts=10):
+    JsonFileProducer.json_2_redis(fp, spider, redis_cfg, fn, rename=1, ts=10)
 
 # TODO:再抽象一层，就是把某个文件夹下的所有json添加到对应的文件夹队列中
 # def run(process_num=10, rp):

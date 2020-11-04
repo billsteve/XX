@@ -33,7 +33,7 @@ class AddInitUrl:
     def add_url2redis(spider, url, conn_redis, **kwargs):
         return conn_redis.lpush(spider + kwargs.get("suffix", ":start_urls"), url)
 
-    # URL到rcfg
+    # URL到redis_cfg
     @staticmethod
     def add_url2rediscfg(spider, url, cfg, **kwargs):
         conn_redis = ur.RedisHelper.get_redis_connect_by_cfg(cfg)
@@ -109,16 +109,16 @@ class AddInitUrl:
 
     # 把check的URL添加到IU中
     @staticmethod
-    def addInitUrlFromCheck(hcfg, rcfg, getRow, ts=0):
+    def addInitUrlFromCheck(hcfg, redis_cfg, getRow, ts=0):
         import XX.DB.HappyBaseHelper as HaB
 
-        conn_redis = RedisHelper.get_redis_connect_by_cfg(rcfg)
+        conn_redis = RedisHelper.get_redis_connect_by_cfg(redis_cfg)
         conn_hbase = HaB.HappyBaseHeleper.get_connection_by_cfg(hcfg)
         # pool = HaB.HappyBaseHeleper.getPoolByCfg(hcfg)
         while 1:
             keys = conn_redis.keys("*:start_urls:check")
             if not keys:
-                BF.print_from_head("No More Check IU in " + str(rcfg["host"]), ts=ts)
+                BF.print_from_head("No More Check IU in " + str(redis_cfg["host"]), ts=ts)
                 continue
             for key in keys:
                 jd = json.loads(conn_redis.lpop(key))
@@ -141,12 +141,12 @@ class AddInitUrl:
 
     # 重新添加不是200的url到Check
     @staticmethod
-    def readdNot200(rcfg, ts=10, suffix=":init_urls"):
-        conn_redis = RedisHelper.get_redis_connect_by_cfg(rcfg)
+    def readdNot200(redis_cfg, ts=10, suffix=":init_urls"):
+        conn_redis = RedisHelper.get_redis_connect_by_cfg(redis_cfg)
         while 1:
             keys = conn_redis.keys("*not200*")
             if not keys:
-                BF.print_from_head("No More Spider in " + str(rcfg["host"]), ts=ts)
+                BF.print_from_head("No More Spider in " + str(redis_cfg["host"]), ts=ts)
                 continue
             for key in keys:
                 url = conn_redis.spop(key)

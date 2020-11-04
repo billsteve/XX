@@ -1,10 +1,4 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time     : 2018/11/22 17:34
-# @Author   : Peter
-# @Des       : 
-# @File        : Comment
-# @Software: PyCharm
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.declarative import declarative_base

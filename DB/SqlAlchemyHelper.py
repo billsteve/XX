@@ -27,8 +27,8 @@ if __name__ == "__main__":
     import XX.Model.Struct.MysqlConn as cfg
 
     sa = SqlAlchemyHelper()
-    mcfg = cfg.ubuntu_cfg
-    mcfg["db"] = "weibo"
-    print(mcfg)
-    session = sa.get_session_by_cfg(mcfg)
+    mysql_cfg = cfg.ubuntu_cfg
+    mysql_cfg["db"] = "weibo"
+    print(mysql_cfg)
+    session = sa.get_session_by_cfg(mysql_cfg)
     print(session)

@@ -27,9 +27,9 @@ class BloomFilter(object):
         self.seeds = [5, 7, 11, 13, 31, 37, 61]
         self.key = "B_" + key + "_"
         self.blockNum = blockNum
-        self.hashfunc = []
+        self.hash_func = []
         for seed in self.seeds:
-            self.hashfunc.append(SimpleHash(self.bit_size, seed))
+            self.hash_func.append(SimpleHash(self.bit_size, seed))
 
     def is_exists(self, str_input):
         if not str_input:
@@ -39,7 +39,7 @@ class BloomFilter(object):
         str_input = m5.hexdigest()
         ret = True
         name = self.key + str(int(str_input[0:2], 16) % self.blockNum)
-        for f in self.hashfunc:
+        for f in self.hash_func:
             loc = f.hash(str_input)
             ret = ret & self.redis_conn.getbit(name, loc)
         return ret
@@ -51,7 +51,7 @@ class BloomFilter(object):
         m5.update(str_input.encode("utf-8"))
         str_input = m5.hexdigest()
         name = self.key + str(int(str_input[0:2], 16) % self.blockNum)
-        for f in self.hashfunc:
+        for f in self.hash_func:
             loc = f.hash(str_input)
             self.redis_conn.setbit(name, loc, 1)
         return 1
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     """ 第一次运行时会显示 not exists!，之后再运行会显示 exists! """
     from .DB.RedisHelper import *
 
-    conn_redis = RedisHelper.get_redis_connect("localhost", pwd=None, db=0)
+    conn_redis = RedisHelper.get_redis_connect("localhost", password=None, db=0)
     bf = BloomFilter(conn_redis)
     if bf.is_exists('http://www.baidu.com'):  # 判断字符串是否存在
         print('exists!')

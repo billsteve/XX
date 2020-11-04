@@ -130,7 +130,7 @@ def fetch(conn, sql):
         conn.ping()
         rows = []
     finally:
-        cur.close()
+        conn.close()
     return rows
 
 

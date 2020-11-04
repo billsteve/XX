@@ -22,8 +22,8 @@ class RegExpHelper():
 
     @staticmethod
     def get_ips(txt):
-        return re.findall(
-            r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b", txt)
+        reg_txt = r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"
+        return re.findall(reg_txt, txt)
         # return re.findall("((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))", txt)
 
     @staticmethod
@@ -93,3 +93,9 @@ class RegExpHelper():
     @staticmethod
     def get_chinese(s):
         return re.sub("[A-Za-z0-9\_\{\}\$\.\:\/\"\!\%\[\]\,\。]", "", s)
+
+
+if __name__ == '__main__':
+    r = RegExpHelper()
+    s = r.get_ips("192.168.1.1")
+    print(s)

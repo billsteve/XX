@@ -1,10 +1,4 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time       : 2018/7/8 22:44
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : data.py
-# @Software : PyCharm
 import time
 
 import XX.Encrypt.EncryptHelper as cenc

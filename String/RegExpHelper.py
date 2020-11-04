@@ -35,7 +35,6 @@ def repleaseEmoji(sourceStr, replaceStr=''):
         try:
             co = re.compile('[\U00010000-\U0010ffff]')
         except re.error:
-            import traceback
             co = re.compile('[\uD800-\uDBFF][\uDC00-\uDFFF]')
         return co.sub(sourceStr, replaceStr)
     else:

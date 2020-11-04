@@ -2,7 +2,6 @@
 import os
 import shutil
 import time
-import traceback
 
 import XX.Encrypt.EncryptHelper as cenc
 
@@ -36,8 +35,7 @@ class FileHelper(object):
         except TypeError:
             return open(file_path, "r").read()
         except:
-            traceback.print_exc()
-            return
+            raise
 
     @staticmethod
     def read_file_lines(file_path, *arg, **kw):
@@ -47,8 +45,7 @@ class FileHelper(object):
         except TypeError:
             return open(file_path, "r").readline()
         except:
-            traceback.print_exc()
-            return
+            raise
 
     @staticmethod
     def save_file(file_path, content="", method="a", *arg, **kw):
@@ -59,8 +56,7 @@ class FileHelper(object):
             open(file_path, method).write(content)
             return len(content)
         except:
-            traceback.print_exc()
-            return
+            raise
 
     @staticmethod
     def remove_dir(file_path):
@@ -71,11 +67,7 @@ class FileHelper(object):
         file_path = file_path.rstrip("/")
         isExists = os.path.exists(file_path)
         if isExists:
-            try:
-                shutil.rmtree(file_path)
-            except:
-                traceback.print_exc()
-                return
+            shutil.rmtree(file_path)
         return True
 
     @staticmethod
@@ -87,11 +79,7 @@ class FileHelper(object):
         file_path = file_path.rstrip("/")
         isExists = os.path.exists(file_path)
         if not isExists:
-            try:
-                os.makedirs(file_path)
-            except:
-                traceback.print_exc()
-                return
+            os.makedirs(file_path)
         return True
 
     @staticmethod
@@ -142,13 +130,9 @@ class FileHelper(object):
         return md5_str[0] + os.sep + md5_str[1] + os.sep + md5_str[2] + os.sep + md5_str
 
     @staticmethod
-    def copy(ffrom, fto):
-        FileHelper.mkdir(FileHelper.get_file_path_and_name(fto)[0])
-        try:
-            return shutil.copy(ffrom, fto)
-        except shutil.SameFileError as e:
-            print(e)
-            return 0
+    def copy(file_from, file_to):
+        FileHelper.mkdir(FileHelper.get_file_path_and_name(file_to)[0])
+        return shutil.copy(file_from, file_to)
 
     @staticmethod
     def mk16dir(root_path):
@@ -169,12 +153,9 @@ class FileHelper(object):
     # 获取更新时间
     @staticmethod
     def get_update_ts(fp):
-        try:
-            return os.path.getmtime(fp)
-        except:
-            return -1
+        return os.path.getmtime(fp)
 
-    # 添加PYTHONPAH
+    # 添加PYTHON环境变量
     @staticmethod
     def add_python_path(path):
         import sys

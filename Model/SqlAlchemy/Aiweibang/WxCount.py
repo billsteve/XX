@@ -1,10 +1,4 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time       : 2018/9/12 22:43
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : WxCount.py
-# @Software : PyCharm
 # coding: utf-8
 from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base

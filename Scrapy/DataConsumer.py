@@ -26,11 +26,11 @@ class MQ2DB(IDataCustomer):
         pass
 
     @staticmethod
-    def save2db(json_data, spider, mcfg):
+    def save2db(json_data, spider, mysql_cfg):
         module = importlib.import_module("SpiderJson2DB")
         func = getattr(module, spider)
         if func:
-            return func(json_data, mcfg, spider)
+            return func(json_data, mysql_cfg, spider)
         else:
             print("No " + str(spider) + "'s  save 2 db")
 
@@ -39,8 +39,8 @@ class Redis2Mysql(MQ2DB):
 
     # 初始化redis和MySQL连接类
     def __init__(self, **kw):
-        self.conn_redis = udr.RedisHelper.get_redis_connect_by_cfg(kw.get("rcfg"))
-        self.conn_mysql = sa.SqlAlchemyHelper.get_session_by_cfg(kw.get("mcfg"))
+        self.conn_redis = udr.RedisHelper.get_redis_connect_by_cfg(kw.get("redis_cfg"))
+        self.conn_mysql = sa.SqlAlchemyHelper.get_session_by_cfg(kw.get("mysql_cfg"))
 
     # def customer(self, **kw):
     #     self.redis2mysql(**kw)
@@ -56,7 +56,7 @@ class Redis2Mysql(MQ2DB):
             if json_str:
                 json_data = json.loads(json_str, encoding="utf-8")
                 func = kw.get("func")
-                # func(json_data, kw.get("mcfg"))
+                # func(json_data, kw.get("mysql_cfg"))
                 func(json_data, self.conn_mysql)
             else:
                 bf.print_no_end(spider + "\tNo more item")
@@ -68,8 +68,8 @@ class Redis2Mysql(MQ2DB):
 
 #
 def redis2mysql(**kw):
-    conn_redis = udr.RedisHelper.get_redis_connect_by_cfg(kw.get("rcfg"))
-    conn_mysql = sa.SqlAlchemyHelper.get_session_by_cfg(kw.get("mcfg"))
+    conn_redis = udr.RedisHelper.get_redis_connect_by_cfg(kw.get("redis_cfg"))
+    conn_mysql = sa.SqlAlchemyHelper.get_session_by_cfg(kw.get("mysql_cfg"))
     while 1:
         spider = kw.get("spider")
         json_str = conn_redis.rpop(spider + ":items")

@@ -46,6 +46,7 @@ class ResponseObj(ScrapyResponse):
         self.callback = kw.get("callback")
 
 
+
 if __name__ == "__main__":
     a = ResponseObj(a=1)
-    print()
+    print(a.a)

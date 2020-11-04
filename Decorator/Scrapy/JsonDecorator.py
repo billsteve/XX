@@ -46,6 +46,6 @@ def Json2File(fp=None, *dargs, **dkargs):
 
 
 @JsonCheckDecorator
-def test(json_data, mcfg):
+def test(json_data, mysql_cfg):
     print("Ok" * 22)
     pass

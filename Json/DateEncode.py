@@ -1,11 +1,4 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time       : 2019/5/13 13:56
-# @Author    : Bill Steve
-# @Email      : billsteve@126.com
-# @File         : DateEncode.py
-# @Des         : 
-# @Software : PyCharm
 import datetime
 import json
 from datetime import date

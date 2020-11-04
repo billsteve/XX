@@ -3,7 +3,6 @@
 import re
 from urllib.parse import unquote
 import requests
-import traceback
 import sys
 
 
@@ -331,7 +330,6 @@ def get_complete_text_autohome(text):
         try:
             char_list = get_char(js)
         except Exception as e:
-            traceback.print_exc()
             continue
         type_charlist.update({_type: char_list})
 

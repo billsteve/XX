@@ -45,7 +45,7 @@ class MysqlPipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         cls.settings = crawler.settings
-        cls.session = sa.SqlAlchemyHelper.getMysqlSessionByCfg(cls.settings.get("MCFG"))
+        cls.session = sa.SqlAlchemyHelper.getMysqlSessionByCfg(cls.settings.get("mysql_cfg"))
         return cls()
 
     def process_item(self, item, spider):

@@ -1,9 +1,4 @@
-#!/usr/bin/python3
 # -*- coding:utf-8 -*-
-# @Time        : 2018/7/26 18:17
-# @Email       : billsteve@126.com
-# @File          : ROOTPATH.py
-# @Software  : PyCharm
 # ROOT_PATH ===========格式是：root + project + FileType + item
 import os
 import traceback
@@ -52,7 +47,7 @@ root_path_media_json = root_path_media + "json" + sc
 root_path_media_log = root_path_media + "log" + sc
 root_path_media_html_detail = root_path_media_html + "detail" + sc
 
-# 智汉
+# zh
 root_path_zh = root_path + "zh" + sc
 root_path_zh_cache = root_path_zh + "cache" + sc
 root_path_zh_log = root_path_zh + "log" + sc
@@ -71,7 +66,7 @@ root_path_awb_cache = root_path_awb + "cache" + sc
 root_path_awb_log = root_path_awb + "log" + sc
 root_path_awb_json = root_path_awb + "json" + sc
 
-# LOG地址
+# LOG
 Project_log = root_path_zh_log
 EXCEPT_PATH = Project_log + "parse_fail.log"
 NO_MORE_PATH = Project_log + "no_more.log"
