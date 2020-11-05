@@ -24,7 +24,7 @@ def parse_dict(item):
 
 
 # 从url中获取参数列表
-def formatUrlToDict(url):
+def format_url_to_dict(url):
     res = {}
     try:
         values = url.split('?')[-1]
