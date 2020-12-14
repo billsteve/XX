@@ -14,6 +14,8 @@ def print_function(s, flush=True, *arg, **kw):
     ts = int(kw.get("ts", 0))
     if "ts" in kw:
         kw.pop("ts")
+    if "now_ts" in kw:
+        kw.pop("now_ts")
     print(s, flush=flush, *arg, **kw)
     time.sleep(ts)
 
@@ -30,9 +32,9 @@ def print_from_head(s, **kw):
     print_no_end("\r" + Dt.get_now_time() + "\t" + str(s), **kw)
 
 
-def print_wait(ts=1, s=""):
+def print_wait(ts=1, s="",now_ts=int(time.time())):
     for t in range(ts):
-        print_from_head(f"{s} Please Wait {ts - t}" + "." * t + "        ")
+        print_from_head(f"{s} Please Wait {ts - t}" + "." * t + "        ",now_ts=now_ts)
         time.sleep(1)
 
 
