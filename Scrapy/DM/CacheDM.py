@@ -122,7 +122,7 @@ class CacheFileRequest(object):
                             return True
                         else:
                             logger.debug(
-                                f"排除的URL没过期，不重写。过了{time.time() - Fh.get_update_ts(cache_file_path)} 秒？ {cache_file_path}")
+                                f"排除的URL没过期，不重写。过了{int(time.time() - Fh.get_update_ts(cache_file_path))} 秒？ {cache_file_path}")
                             return False
                     else:
                         logger.debug(f"排除URL没设置过期时间 都要重写。 {cache_file_path}")

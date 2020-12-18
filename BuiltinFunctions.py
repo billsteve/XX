@@ -29,12 +29,12 @@ def print_blank_end(s, flush=True, end=" ", *arg, **kw):
 
 
 def print_from_head(s, **kw):
-    print_no_end("\r" + Dt.get_now_time() + "\t" + str(s), **kw)
+    print_no_end("\r" + Dt.get_now_time(kw.get("now_ts")) + "\t" + str(s), **kw)
 
 
-def print_wait(ts=1, s="",now_ts=int(time.time())):
+def print_wait(ts=1, s="", now_ts=int(time.time())):
     for t in range(ts):
-        print_from_head(f"{s} Please Wait {ts - t}" + "." * t + "        ",now_ts=now_ts)
+        print_from_head(f"{s} Please Wait {ts - t}" + "." * t + "        ", now_ts=now_ts)
         time.sleep(1)
 
 
