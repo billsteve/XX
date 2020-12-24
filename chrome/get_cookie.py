@@ -3,7 +3,6 @@ import base64
 import json
 import os
 import sqlite3
-from shutil import copyfile
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from win32crypt import CryptUnprotectData
@@ -30,8 +29,13 @@ def decrypt_string(key, data):
 
 
 def get_cookie_from_chrome(host='www.cnvd.org.cn'):
-    local_state = os.environ['LOCALAPPDATA'] + r'\Google\Chrome\User Data\Local State'
-    cookie_path = os.environ['LOCALAPPDATA'] + r"\Google\Chrome\User Data\Default\Cookies"
+    import sys
+    if sys.platform.lower().startswith("win"):
+        local_state = os.environ['LOCALAPPDATA'] + r'\Google\Chrome\User Data\Local State'
+        cookie_path = os.environ['LOCALAPPDATA'] + r"\Google\Chrome\User Data\Default\Cookies"
+    else:
+        local_state = r'/root/.config/google-chrome/Default/Local State'
+        cookie_path = r"/root/.config/google-chrome/Default/Cookies"
 
     # TODO:
     # if os.path.exists(cookie_path+".db"):
@@ -56,4 +60,4 @@ def get_cookie_from_chrome(host='www.cnvd.org.cn'):
 
 if __name__ == '__main__':
     s = get_cookie_from_chrome()
-    print(s['__jsl_clearance_s'])
+    print(s)

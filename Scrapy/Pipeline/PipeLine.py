@@ -12,7 +12,7 @@ import XX.DB.SqlAlchemyHelper as sa
 import XX.Encrypt.EncryptHelper as enc
 import XX.File.FileHelper as cf
 import XX.HTML.HtmlHelper as chtml
-import XX.Tools.BuiltinFunctions as bf
+import XX.BuiltinFunctions as bf
 
 
 # File pipeline:放到今日文件中
