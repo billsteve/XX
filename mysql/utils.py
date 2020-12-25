@@ -40,8 +40,6 @@ def connect(host="localhost", user="root", password="123456", port=3306, charset
             import traceback
             traceback.print_exc()
             logger.info("data connection error,%s" % e)
-        finally:
-            pass
     if use_global:
         global_conn = conn
         logger.info("首次连接")
@@ -58,8 +56,6 @@ def close(conn):
         conn.close()
     except Exception as e:
         logger.info("data shutdown error,%s" % e)
-    finally:
-        pass
 
     return True
 
@@ -78,8 +74,6 @@ def insert(conn, sql):
         logger.info("data insert error")
         conn.rollback()
         id_ = -1
-    finally:
-        cur.close()
     return id_
 
 
@@ -93,8 +87,6 @@ def lastrowid(conn):
     except Exception as e:
         logger.info("data last_id error,%s" % e)
         id_ = -1
-    finally:
-        cur.close()
     return id_
 
 
@@ -129,8 +121,6 @@ def fetch(conn, sql):
         conn.rollback()
         conn.ping()
         rows = []
-    finally:
-        conn.close()
     return rows
 
 
