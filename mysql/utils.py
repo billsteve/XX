@@ -174,5 +174,5 @@ def make_update_sql(table: str, data: dict, replace=1) -> str:
             else:
                 update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE null END \n"
     update_ = update_.lstrip(",")
-    sql += update_ + f" WHERE id = {data['id']}"
+    sql += update_ + f" WHERE id = '{data['id']}' "
     return sql
