@@ -132,7 +132,7 @@ def make_insert_sql(table: str, data: dict, updates: dict, replace=1) -> str:
     updates_sql = ""
     for key in data.keys():
         if data[key]:
-            data[key] = pymysql.escape_string(str(data[key]))
+            data[key] = pymysql.converters.escape_string(str(data[key]))
         columns_sql = columns_sql + "`" + key + "`,\t"
         if data[key] is not None:
             values_sql = values_sql + "'" + str(data[key]) + "',\t"
@@ -167,12 +167,12 @@ def make_update_sql(table: str, data: dict, replace=1) -> str:
     for k, v in data.items():
         if replace:
             if v:
-                update_ += f",{k.strip()}='{pymysql.escape_string(str(v))}' \n "
+                update_ += f",{k.strip()}='{pymysql.converters.escape_string(str(v))}' \n "
             else:
                 update_ += f",{k.strip()}=null \n"
         else:
             if v:
-                update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE '{pymysql.escape_string(str(v))}' END \n"
+                update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE '{pymysql.converters.escape_string(str(v))}' END \n"
             else:
                 update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE null END \n"
     update_ = update_.lstrip(",")
