@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import pickle
+import traceback
 
 import requests
 from logzero import logger
@@ -17,7 +18,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class RequestHelper(object):
     @staticmethod
-    def send_request(url, **kw):
+    def send_request(url,*args, **kw):
         response = ResponseObj()
         response.status_code = 0
         response.status = 0

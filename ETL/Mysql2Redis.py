@@ -10,53 +10,51 @@ import XX.DB.RedisHelper as  RH
 import XX.File.FileHelper as FH
 
 
-def get_key_type(key1):
-    if key1.startswith("l"):
-        key1Type = "list"
-    elif key1.startswith("s"):
-        key1Type = "set"
-    elif key1.startswith("k"):
-        key1Type = "kv"
-    elif key1.startswith("z"):
-        # TODO:
-        key1Type = "zset"
-    elif key1.startswith("h"):
-        # TODO:
-        key1Type = "hash"
+def get_key_type(k):
+    if k.startswith("l"):
+        t = "list"
+    elif k.startswith("s"):
+        t = "set"
+    elif k.startswith("k"):
+        t = "kv"
+    elif k.startswith("z"):
+        t = "zset"
+    elif k.startswith("h"):
+        t = "hash"
     else:
-        key1Type = None
-    return key1Type
+        t = None
+    return t
 
 
-def get_key_value(key, r):
-    keyType = get_key_type(key)
-    if keyType == "list":
-        return r.lpop(key)
-    elif keyType == "set":
-        return r.spop(key)
-    elif keyType == "kv":
-        return r.get(key)
-    elif keyType == "zset":
-        return r.zrange(key, 0, 1)
-    elif keyType == "hash":
-        return r.hget(key)
+def get_key_value(key, conn):
+    key_type = get_key_type(key)
+    if key_type == "list":
+        return conn.lpop(key)
+    elif key_type == "set":
+        return conn.spop(key)
+    elif key_type == "kv":
+        return conn.get(key)
+    elif key_type == "zset":
+        return conn.zrange(key, 0, 1)
+    elif key_type == "hash":
+        return conn.hget(key)
     else:
         return None
 
 
 def set_key_value(key, val, r, *arg, **kw):
-    keyType = get_key_type(key)
-    if keyType == "list":
+    key_type = get_key_type(key)
+    if key_type == "list":
         return r.rpush(key, val)
-    elif keyType == "set":
+    elif key_type == "set":
         return r.sadd(key, val)
-    elif keyType == "kv":
+    elif key_type == "kv":
         return r.set(key, val)
-    elif keyType == "zset":
+    elif key_type == "zset":
         if kw.get("score"):
             return r.zset(key, val, kw.get("score"))
         return
-    elif keyType == "hash":
+    elif key_type == "hash":
         return r.hset(key, val)
     else:
         print(" Not allowed keyType " + key)
@@ -64,6 +62,7 @@ def set_key_value(key, val, r, *arg, **kw):
 
 
 # DB 2 Redis
+# TODO:优化测试 2021年1月19日11:50:42
 class Table2Redis():
     def __init__(self, *argvs, **kw):
         self.db = kw.get("mysql_cfg", {}).get("db")
@@ -98,6 +97,7 @@ class Table2Redis():
         key_type = key_type if key_type else get_key_type(key_name)
         while keys:
             val = k_ADDREDIS_FROM_ID,
+            # TODO:
             keys = self.ConnMysql.get_lists(sql, val)
             for one_key in keys:
                 key = list(one_key)

@@ -25,7 +25,7 @@ def getSqlByDict(d, tb_name="tb_name", tb_comment="COMMENT"):
             s += """\t`{key}` varchar(255) DEFAULT NULL,""".format(key=k if str(k) != "id" else "web_id") + "\n"
     s += """
         `is_del` int(11) DEFAULT 0,
-        `update_ts` int(11) DEFAULT NULL,
+        `update_ts` bigint(20) DEFAULT NULL,
         `create_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (`id`)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='{tb_comment}';""".format(tb_comment=tb_comment)
@@ -46,6 +46,7 @@ def delRedisKeysByPrefix(prefix, conn):
             print(key)
 
 def getColumnsByDDL(ddl):
+    pass
     
 
 

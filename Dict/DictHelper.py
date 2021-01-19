@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import decimal
+from datetime import datetime, date
 
 import XX.List.ListHelper
 
@@ -31,6 +33,12 @@ class DictHelper():
                 dd[k] = str(v.decode(coding))
             elif type(v) == list or type(v) == tuple:
                 dd[k] = XX.List.ListHelper.ListHelper.decode_v((list(v), coding))
+            elif isinstance(v, decimal.Decimal):
+                dd[k] = float(v)
+            elif isinstance(v, datetime):
+                dd[k] = v.strftime('%Y-%m-%d %H:%M:%S')
+            elif isinstance(v, date):
+                dd[k] = v.strftime('%Y-%m-%d')
             else:
                 dd[k] = v
         return dd

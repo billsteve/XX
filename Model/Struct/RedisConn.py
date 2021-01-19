@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import functools
+
 
 def get_redis_conn_cfg(**kw):
     d = dict()
@@ -9,8 +11,8 @@ def get_redis_conn_cfg(**kw):
     d["decode_responses"] = kw.get("decode_responses", True)
     return d
 
-# ali_cfg = functools.partial(get_redis_conn_cfg, host="39.104.97.69", pwd="DRsXT5ZJ6Oi55LPQ", db=0)
-# ali2_cfg = functools.partial(get_redis_conn_cfg, host="39.104.57.130", pwd="DRsXT5ZJ6Oi55LPQ", db=0)
-# ubuntu_cfg = functools.partial(get_redis_conn_cfg, host="192.168.1.44", db=0)
-# local = functools.partial(get_redis_conn_cfg, host="localhost", db=0)
-# zhihan00 = functools.partial(get_redis_conn_cfg, host="zhihan00", db=0)
+ali_cfg = functools.partial(get_redis_conn_cfg, host="39.104.97.69", pwd="DRsXT5ZJ6Oi55LPQ", db=0)
+ali2_cfg = functools.partial(get_redis_conn_cfg, host="39.104.57.130", pwd="DRsXT5ZJ6Oi55LPQ", db=0)
+ubuntu_cfg = functools.partial(get_redis_conn_cfg, host="192.168.1.44", db=0)
+local = functools.partial(get_redis_conn_cfg, host="localhost", db=0)
+zhihan00 = functools.partial(get_redis_conn_cfg, host="zhihan00", db=0)

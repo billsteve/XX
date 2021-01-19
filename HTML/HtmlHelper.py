@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import decimal
 import re
 import urllib.parse
+from datetime import datetime, date
 
 
 def url_parse(k):
@@ -11,7 +13,7 @@ def url_encode(k):
     return urllib.parse.quote(str(k))
 
 
-# 给不能dump的字段，该为能dump
+# 给不能dump的字段，改为能dump
 def parse_dict(item):
     for k in item:
         if isinstance(item[k], str):
@@ -20,6 +22,12 @@ def parse_dict(item):
             item[k] = parse_dict(item[k])
         elif isinstance(item[k], list):
             item[k] = parse_dict(item[k])
+        elif isinstance(item[k], decimal.Decimal):
+            item[k] = float(item[k])
+        elif isinstance(item[k], datetime):
+            item[k] = item[k].strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(item[k], date):
+            item[k] = item[k].strftime('%Y-%m-%d')
     return item
 
 

@@ -7,7 +7,7 @@
 import time
 
 import XX.Model.Struct.RedisConn as RC
-import XX.Tools.BuiltinFunctions as BF
+import XX.BuiltinFunctions as BF
 from XX.DB.RedisHelper import *
 from logzero import logger
 

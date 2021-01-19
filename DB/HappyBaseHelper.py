@@ -3,7 +3,7 @@
 import happybase
 
 
-class HappyBaseHeleper:
+class HappyBaseHelper:
     connection = None
     table = None
     pool = None

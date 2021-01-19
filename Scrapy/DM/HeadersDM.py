@@ -1,10 +1,4 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time     : 2018/12/17 10:51
-# @Email     : billsteve@126.com
-# @Des       : 
-# @File        : HeadersDM
-# @Software: PyCharm
 import random
 
 
@@ -33,7 +27,7 @@ class RandomUserAgentPc(object):
         request.headers.setdefault('User-Agent', ua)
 
 
-class RandomUserAgent_mobile(object):
+class RandomUserAgentMobile(object):
 
     def process_request(self, request, spider):
         import user_agent
@@ -41,7 +35,7 @@ class RandomUserAgent_mobile(object):
         request.headers.setdefault('User-Agent', ua)
 
 
-class RandomUserAgent_weixin(object):
+class RandomUserAgentWechat(object):
     userAgents = {
         'weixin': [
             # weixin pc for windows

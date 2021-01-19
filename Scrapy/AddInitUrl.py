@@ -11,13 +11,13 @@ import time
 
 import XX.DB.RedisHelper as ur
 import XX.DB.SqlAlchemyHelper as sa
-import XX.Tools.BloomFilter as BloomFilter
-import XX.Tools.BuiltinFunctions as BF
+import XX.BloomFilter as BloomFilter
+import XX.BuiltinFunctions as BF
 from XX.DB.RedisHelper import *
 from logzero import logger
 
 
-# 添加入库url
+# 添加入口url
 class AddInitUrl:
 
     def __init__(self):
@@ -68,13 +68,13 @@ class AddInitUrl:
                     if url:
                         url = url.strip()
                         if kwargs.get("bf"):
-                            bloomFilter = BloomFilter.BloomFilter(conn_redis, key=spider)
-                            if bloomFilter.is_exists(url):
+                            bf = BloomFilter.BloomFilter(conn_redis, key=spider)
+                            if bf.is_exists(url):
                                 BF.print_no_end("-")
                             else:
                                 res = conn_redis.lpush(spider + kwargs.get("suffix", ":start_urls"), url)
                                 logger.info(str((spider, res, info.id, url)))
-                                bloomFilter.add(url)
+                                bf.add(url)
                         else:
                             res = conn_redis.lpush(spider + kwargs.get("suffix", ":start_urls"), url)
                             logger.info(str((spider, res, info.id, url)))
@@ -113,8 +113,9 @@ class AddInitUrl:
         import XX.DB.HappyBaseHelper as HaB
 
         conn_redis = RedisHelper.get_redis_connect_by_cfg(redis_cfg)
-        conn_hbase = HaB.HappyBaseHeleper.get_connection_by_cfg(hcfg)
-        # pool = HaB.HappyBaseHeleper.getPoolByCfg(hcfg)
+        # TODO:
+        conn_hbase = HaB.HappyBaseHelper.get_connection_by_cfg(hcfg)
+        # pool = HaB.HappyBaseHelper.getPoolByCfg(hcfg)
         while 1:
             keys = conn_redis.keys("*:start_urls:check")
             if not keys:
@@ -124,12 +125,12 @@ class AddInitUrl:
                 jd = json.loads(conn_redis.lpop(key))
                 url = jd["url"]
                 if url:
-                    # table = HaB.HappyBaseHeleper.getTable("crawl_" + jd["project"], pool=pool)
-                    table = HaB.HappyBaseHeleper.get_table("crawl_" + jd["project"], conn=conn_hbase)
+                    # table = HaB.HappyBaseHelper.getTable("crawl_" + jd["project"], pool=pool)
+                    table = HaB.HappyBaseHelper.get_table("crawl_" + jd["project"], conn=conn_hbase)
                     # HBase是否存在
                     row = getRow(url=url)
                     if row:
-                        exists = HaB.HappyBaseHeleper.get_row(row)
+                        exists = HaB.HappyBaseHelper.get_row(row)
                         if not exists:
                             res = conn_redis.lpush(key[:-6], url)
                             print("Add new IU res \t\t" + str(res))
@@ -141,7 +142,7 @@ class AddInitUrl:
 
     # 重新添加不是200的url到Check
     @staticmethod
-    def readdNot200(redis_cfg, ts=10, suffix=":init_urls"):
+    def readNot200(redis_cfg, ts=10, suffix=":init_urls"):
         conn_redis = RedisHelper.get_redis_connect_by_cfg(redis_cfg)
         while 1:
             keys = conn_redis.keys("*not200*")

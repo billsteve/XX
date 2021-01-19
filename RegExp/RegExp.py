@@ -10,7 +10,7 @@ import re
 import XX.Date.DatetimeHelper as DT
 
 
-class RegExpHelper():
+class RegExpHelper:
 
     @staticmethod
     def get_url_from_html(txt):
@@ -54,10 +54,10 @@ class RegExpHelper():
             print(result[0])
             result[0] = result[0].replace('年', '-').replace('月', '-').replace('日', '').replace('号', '')
             if result[0] == "今天":
-                return DT.GetToday()
+                return DT.get_today()
             if len(result[0]) == 4 or len(result[0]) == 5:
                 print(result[0])
-                return str(DT.GetToday().split("-")[0]) + result[0]
+                return str(DT.get_today().split("-")[0]) + result[0]
             return result[0]
         except Exception as e:
             print(e)
@@ -74,10 +74,10 @@ class RegExpHelper():
         try:
             result[0] = result[0].replace('年', '-').replace('月', '-').replace('日', '').replace('号', '')
             if result[0] == "今天":
-                return DT.GetToday()
+                return DT.get_today()
             if len(result[0]) == 4 or len(result[0]) == 5:
                 print(result[0])
-                return str(DT.GetToday().split("-")[0]) + result[0]
+                return str(DT.get_today().split("-")[0]) + result[0]
             return result[0]
         except Exception as e:
             print(e)

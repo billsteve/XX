@@ -17,7 +17,7 @@ class KafkaPipeline(object):
         topic = self.client.topics[spider.name]
         producer = topic.get_producer()
         # 数据处理
-        item = chtml.parseDict(item)
+        item = chtml.parse_dict(item)
         json_str = json.dumps(item, ensure_ascii=False)
         producer.produce(json_str)
         bf.print_from_head(spider.name + "\tAdd kafka")

@@ -12,7 +12,7 @@ import time
 import XX.Encrypt.EncryptHelper as enc
 import XX.File.FileHelper as cf
 import XX.HTML.HtmlHelper as chtml
-import XX.Tools.BuiltinFunctions as bf
+import XX.BuiltinFunctions as bf
 from logzero import logger
 from thrift.transport import TSocket
 import XX.DB.SqlAlchemyHelper as sa
@@ -29,13 +29,13 @@ class FilePipeline(object):
 
     def process_item(self, item, spider):
         # 数据处理
-        item = chtml.parseDict(item)
+        item = chtml.parse_dict(item)
         today = time.strftime("%Y_%m_%d", time.localtime(int(time.time())))
         json_str = json.dumps(item, ensure_ascii=False)
 
         # 保存数据到文件
-        file_path = FilePipeline.settings.get("ROOT_PATH_JSON") + spider.name + os.sep + today + ".json"
-        cf.FileHelper.saveFile(file_path, json_str + "\n")
+        file_path = self.settings.get("ROOT_PATH_JSON") + spider.name + os.sep + today + ".json"
+        cf.FileHelper.save_file(file_path, json_str + "\n")
         return item
 
 
@@ -45,12 +45,12 @@ class MysqlPipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         cls.settings = crawler.settings
-        cls.session = sa.SqlAlchemyHelper.getMysqlSessionByCfg(cls.settings.get("mysql_cfg"))
+        cls.session = sa.SqlAlchemyHelper.get_session_by_cfg(cls.settings.get("mysql_cfg"))
         return cls()
 
     def process_item(self, item, spider):
         import importlib
-        module = importlib.import_module("Util.Json2Mysql", MysqlPipeline.settings.get("PROJECT_PATH"))
+        module = importlib.import_module("Util.Json2Mysql", self.settings.get("PROJECT_PATH"))
         if hasattr(module, spider.name):
             getattr(module, spider.name)(item, self.session)
         else:
@@ -71,13 +71,13 @@ class KafkaPipeline(object):
         self.client = KafkaClient(hosts="LOCALHOST" + ":6667")
 
     def process_item(self, item, spider):
-        topicdocu = self.client.topics[spider.name]
-        producer = topicdocu.get_producer()
+        topic = self.client.topics[spider.name]
+        producer = topic.get_producer()
         # 数据处理
-        item = chtml.parseDict(item)
+        item = chtml.parse_dict(item)
         json_str = json.dumps(item, ensure_ascii=False)
         producer.produce(json_str)
-        bf.printFromHead(spider.name + "\tAdd kafka")
+        bf.print_from_head(spider.name + "\tAdd kafka")
         return item
 
 

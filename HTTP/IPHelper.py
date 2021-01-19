@@ -11,8 +11,8 @@ import socket
 def getUrlIpList(domain):  # 获取域名解析出的IP列表
     ip_list = []
     try:
-        addrs = socket.getaddrinfo(domain, None)
-        for item in addrs:
+        addr_info = socket.getaddrinfo(domain, None)
+        for item in addr_info:
             if item[4][0] not in ip_list:
                 ip_list.append(item[4][0])
     except Exception as e:

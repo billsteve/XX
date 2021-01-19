@@ -24,10 +24,10 @@ class SqlAlchemyHelper():
 
 
 if __name__ == "__main__":
-    import XX.Model.Struct.MysqlConn as cfg
+    import XX.Model.Struct.MysqlConn as Mcfg
 
     sa = SqlAlchemyHelper()
-    mysql_cfg = cfg.ubuntu_cfg
+    mysql_cfg = Mcfg.ubuntu_cfg
     mysql_cfg["db"] = "weibo"
     print(mysql_cfg)
     session = sa.get_session_by_cfg(mysql_cfg)

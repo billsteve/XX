@@ -12,7 +12,7 @@ from XX.Scrapy.DM.CacheDM import CacheFileRequest
 
 
 def get_cache_file(url, spider=None, root_path_cache_=""):
-    return root_path_cache_ + spider + os.sep + Fh.FileHelper.getMd5Name(url) + ".cache"
+    return root_path_cache_ + spider + os.sep + Fh.FileHelper.get_md5_name(url) + ".cache"
 
 
 class TestCacheDM(unittest.TestCase):

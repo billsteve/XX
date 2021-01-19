@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import decimal
+from datetime import datetime, date
+
 import XX.Dict.DictHelper
 
 
@@ -13,6 +16,12 @@ class ListHelper:
                 ll.append(v.decode(coding))
             elif type(v) == dict:
                 ll.append(XX.Dict.DictHelper.DictHelper.decode_v(v, coding))
+            elif isinstance(v, decimal.Decimal):
+                ll.append(float(v))
+            elif isinstance(v, datetime):
+                ll.append(v.strftime('%Y-%m-%d %H:%M:%S'))
+            elif isinstance(v, date):
+                ll.append(v.strftime('%Y-%m-%d'))
             else:
                 ll.append(v)
         return ll

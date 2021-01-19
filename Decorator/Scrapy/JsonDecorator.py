@@ -35,7 +35,7 @@ def Json2File(fp=None, *dargs, **dkargs):
                 spider = args[1]
                 fp = args[3]
             if json_data:
-                today = dt.GetToday().replace("-", "_")
+                today = dt.get_today().replace("-", "_")
                 uf.FileHelper.mkdir(fp + spider)
                 json.dump(json_data, open(fp + spider + os.sep + today + ".json", "a", encoding="utf-8"), ensure_ascii=False)
             return func(*args, **kwargs)  # 2

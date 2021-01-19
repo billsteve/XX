@@ -13,6 +13,6 @@ class MysqlPipeline(object):
 
     def process_item(self, item, spider):
         import importlib
-        module = importlib.import_module("Helper.Json2Mysql", MysqlPipeline.settings.get("PROJECT_PATH"))
-        getattr(module, spider.name)(item, MysqlPipeline.settings.get("mysql_cfg"))
+        module = importlib.import_module("Helper.Json2Mysql", self.settings.get("PROJECT_PATH"))
+        getattr(module, spider.name)(item, self.settings.get("mysql_cfg"))
         return item

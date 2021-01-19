@@ -15,15 +15,15 @@ class MysqlHelper:
     host = None
 
     def __init__(self, host="127.0.0.1", user="root", password="root", db="test", port=3306, charset="utf8", **kw):
-        self._conn = pymysql.connect(host, user, password, db, port=port, charset=charset.replace("-", ""))
+        self._conn = pymysql.connect(host=host, user=user, password=password, db=db, port=port, charset=charset.replace("-", ""))
         if kw.get("kv"):
             self.cur = self._conn.cursor(cursor=pymysql.cursors.DictCursor)
         else:
             self.cur = self._conn.cursor()
 
-    def query(self, sql, vals=None, cursor=None):
-        self.cur.execute(sql, vals)
-        res = ListHelper.decodeV(self.cur.fetchall())
+    def query(self, sql, values=None, cursor=None):
+        self.cur.execute(sql, values)
+        res = ListHelper.decode_v(self.cur.fetchall())
         return res
 
     def execute(self, sql, vals=None, cursor=None, commit=True):

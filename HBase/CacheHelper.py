@@ -9,7 +9,7 @@ import pickle
 
 import XX.Encrypt.EncryptHelper as Enc
 import XX.File.FileHelper as FH
-import XX.Tools.BuiltinFunctions as BF
+import XX.BuiltinFunctions as BF
 import XX.configs as cc
 import happybase
 from logzero import logger
@@ -19,7 +19,8 @@ from logzero import logger
 def cache_file_2_hbase(root_path, hb_cfg, table_name, pro_num=0):
     conn_hbase = happybase.Connection(**hb_cfg)
     table = conn_hbase.table("crawl_" + table_name)
-    for fp, fn in FH.FileHelper.getFileList(root_path):
+    for fp, fn in FH.FileHelper.get_file_list(root_path):
+        # TODO：WORDS16改为string模式
         if not fn.startswith(cc.WORDS16[pro_num]):
             continue
         spider = fp.split(os.sep)[-4]

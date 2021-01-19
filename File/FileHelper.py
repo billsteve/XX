@@ -77,8 +77,8 @@ class FileHelper(object):
         file_path = file_path.strip()
         file_path = file_path.rstrip("\\")
         file_path = file_path.rstrip("/")
-        isExists = os.path.exists(file_path)
-        if not isExists:
+        exists = os.path.exists(file_path)
+        if not exists:
             os.makedirs(file_path)
         return True
 
@@ -93,25 +93,25 @@ class FileHelper(object):
         return os.path.splitext(filename)
 
     @staticmethod
-    def rename_file(filename, tofilename):
-        return os.rename(filename, tofilename)
+    def rename_file(filename, to_filename):
+        return os.rename(filename, to_filename)
 
     @staticmethod
-    def is_file_exit(fpath):
-        return 1 if fpath and os.path.isfile(fpath) else 0
+    def is_file_exit(path):
+        return 1 if path and os.path.isfile(path) else 0
 
     @staticmethod
-    def remove_file(fpath, ts=0):
-        if ts and FileHelper.is_file_exit(fpath) and time.time() - os.path.getmtime(fpath) > ts:
-            if FileHelper.is_file_exit(fpath):
-                if int(time.time()) - FileHelper.get_create_ts(fpath) > ts:
-                    os.remove(fpath)
-                return not FileHelper.is_file_exit(fpath)
+    def remove_file(path, ts=0):
+        if ts and FileHelper.is_file_exit(path) and time.time() - os.path.getmtime(path) > ts:
+            if FileHelper.is_file_exit(path):
+                if int(time.time()) - FileHelper.get_create_ts(path) > ts:
+                    os.remove(path)
+                return not FileHelper.is_file_exit(path)
             else:
                 return 1
-        elif FileHelper.is_file_exit(fpath):
-            os.remove(fpath)
-            return not FileHelper.is_file_exit(fpath)
+        elif FileHelper.is_file_exit(path):
+            os.remove(path)
+            return not FileHelper.is_file_exit(path)
         else:
             return 1
 

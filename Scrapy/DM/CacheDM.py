@@ -11,7 +11,7 @@ from scrapy.http import Request
 from scrapy.http import TextResponse, Response
 
 import XX.Encrypt.EncryptHelper as Enc
-from XX.Date.DatetimeHelper import get_today
+from XX.Date.DatetimeHelper import get_today, get_this_month
 from XX.File.FileHelper import FileHelper as Fh
 from XX.HTML.UrlHelper import UrlHelper as Uh
 
@@ -30,6 +30,10 @@ class CacheFileRequest(object):
         if request:
             method = request.method
             body = request.body.decode("utf-8")
+            # print("POST 缓存")
+        else:
+            # print("----No request")
+            pass
         root_path_cache = kwargs.get("root_path_cache", "./")
         spider = spider if spider else Uh.get_domain(url).replace(".", "_")
         if method.lower() == "post":
@@ -155,61 +159,277 @@ class CacheFileRequest(object):
 
 
 # 文件按天缓存中间件
-class CacheFileByDayRequest(object):
+class CacheFilePerDayRequest(object):
     @staticmethod
     def get_cache_file(*args, **kwargs):
         spider = kwargs.get("spider")
         url = kwargs.get("url")
+        request = kwargs.get("request", {})
+        method = "get"
+        if request:
+            method = request.method
+            body = request.body.decode("utf-8")
+            # print("POST 缓存")
+        else:
+            # print("----No request")
+            pass
         root_path_cache = kwargs.get("root_path_cache", "./")
         spider = spider if spider else Uh.get_domain(url).replace(".", "_")
-        today = get_today().replace("-", "_")
-        return root_path_cache + spider + os.sep + today + os.sep + Fh.get_md5_name(url) + ".cache"
+        if method.lower() == "post":
+            return root_path_cache + spider + os.sep + get_today().replace("-",'_') + os.sep + Fh.get_md5_name(url + "_" + body) + ".cache"
+        else:
+            return root_path_cache + spider + os.sep + get_today().replace("-",'_') + os.sep + Fh.get_md5_name(url) + ".cache"
 
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
-        cls.cache_file_path_by_day = settings.get("FUN_CACHE_FILE_DAY_PATH", cls.get_cache_file)
+        cls.cache_file_path_func = settings.get("FUN_CACHE_FILE_PATH", cls.get_cache_file)
+        cls.cache_file_exclude = settings.get("CACHE_FILE_EXCLUDE")
+        cls.cache_file_ts = settings.get("CACHE_FILE_TS", None)
+        cls.cache_file_exclude_ts = settings.get("CACHE_FILE_EXCLUDE_TS", cls.cache_file_ts)
         cls.settings = settings
         return cls()
 
-    def get_cache_response(self, request, spider):
-        cache_file_path = self.cache_file_path_by_day(url=request.url, spider=spider.name,
-                                                      root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
-        if Fh.is_file_exit(cache_file_path):
+    def process_request(self, request, spider) -> process_request_type:
+        cache_file_path = self.cache_file_path_func(
+            url=str(request.url), spider=str(spider.name),
+            root_path_cache=self.settings.get("ROOT_PATH_CACHE"),
+            request=request)
+
+        # 是否应该读缓存
+        def should_read_cache(request, spider) -> bool:
+            # 存在缓存文件
+            exists_file = Fh.is_file_exit(cache_file_path)
+            # 是排除URL
+            exclude = 1 if self.cache_file_exclude and request.url.find(self.cache_file_exclude) >= 0 else 0
+            if exists_file:
+                if exclude:
+                    if self.cache_file_exclude_ts >= 0:
+                        if time.time() - Fh.get_update_ts(cache_file_path) < self.cache_file_exclude_ts:
+                            return True
+                        else:
+                            logger.debug(
+                                f"缓存文件过期。不读取。{cache_file_path}{Fh.get_update_ts(cache_file_path)}  {request.url}")
+                            return False
+                    # 排除URL无过期时间,就是排除URL都不读缓存
+                    else:
+                        logger.debug(f"排除的，没设置过期时间，全不读缓存。{request.url}")
+                        return False
+                else:
+                    # 全部时间
+                    if self.cache_file_ts:
+                        # 全部URL 没有过期
+                        if time.time() - Fh.get_update_ts(cache_file_path) < self.cache_file_ts:
+                            return True
+                        else:
+                            logger.debug(f"不是排除请求，但是缓存文件过期，不读缓存。{request.url}")
+                            return False
+                    else:
+                        return True
+            else:
+                # logger.debug(f"缓存文件不存在。 {request.url}")
+                return False
+
+        if should_read_cache(request, spider):
             try:
-                logger.info("===Read cache===\t" + request.url + "\t" + cache_file_path)
+                logger.info(f"===Read cache===  {cache_file_path.split(os.sep)[-1]}   {request.url}")
                 return pickle.load(open(cache_file_path, "rb"))
             except Exception as e:
                 logger.info(f"== Can't Read cache ===  Reason is {e}")
                 Fh.remove_file(cache_file_path)
                 traceback.print_exc()
-        return None
-
-    def process_request(self, request, spider) -> process_request_type:
-        response = self.get_cache_response(request, spider)
-        logger.info("===Read cache===\t" + request.url)
-        return response if response else None
+        else:
+            # 不读缓存
+            logger.info("===Shouldn't Read Cache===   " + request.url)
+            pass
 
     # 写文件缓存
     def process_response(self, request, response, spider) -> process_response_type:
-        if response.status == 200:
-            cache_response = self.get_cache_response(request, spider)
-            if not cache_response:
-                # 不存在缓存文件就要写入
-                cache_file_path = self.cache_file_path_by_day(url=request.url,
-                                                              spider=spider.name,
-                                                              root_path_cache=self.settings.get("ROOT_PATH_CACHE"))
-                if not Fh.is_file_exit(cache_file_path):
-                    Fh.mkdir(Fh.get_file_path_and_name(cache_file_path)[0])
-                    try:
-                        pickle.dump(response, open(cache_file_path, "wb"))
-                        logger.info("===Save cache===\t" + cache_file_path)
-                    except Exception as e:
-                        logger.info(f"== Can't Write cache 2 file==  Reason is  {e}")
-                        Fh.remove_file(cache_file_path)
-                        traceback.print_exc()
+        cache_file_path = self.cache_file_path_func(
+            url=str(request.url), spider=str(spider.name),
+            root_path_cache=self.settings.get("ROOT_PATH_CACHE"),
+            request=request)
+
+        # 是否应该重写缓存
+        def should_write_cache(request, spider) -> bool:
+            exists_file = Fh.is_file_exit(cache_file_path)
+            exclude = 1 if self.cache_file_exclude and request.url.find(self.cache_file_exclude) >= 0 else 0
+            if exists_file:
+                if exclude:
+                    if self.cache_file_exclude_ts:
+                        if time.time() - Fh.get_update_ts(cache_file_path) > self.cache_file_exclude_ts:
+                            logger.debug(
+                                f"排除缓存文件过期。需要重写。{cache_file_path}{Fh.get_update_ts(cache_file_path)}  {request.url}")
+                            return True
+                        else:
+                            logger.debug(
+                                f"排除的URL没过期，不重写。过了{int(time.time() - Fh.get_update_ts(cache_file_path))} 秒？ {cache_file_path}")
+                            return False
+                    else:
+                        logger.debug(f"排除URL没设置过期时间 都要重写。 {cache_file_path}")
+                        return True
+                else:
+                    # logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
+                    return False
+            else:
+                logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
+                return True
+
+        if response.status < 300:
+            Fh.mkdir(Fh.get_file_path_and_name(cache_file_path)[0])
+            try:
+                if should_write_cache(request, spider):
+                    if hasattr(response, "certificate"):
+                        del response.certificate
+                    Fh.remove_file(cache_file_path)
+                    pickle.dump(response, open(cache_file_path, "wb"))
+                    logger.info(f"===Write cache===      {cache_file_path}   {request.url}")
+                # else:
+                #     logger.info(f"===Cache Exists===      {cache_file_path}   {request.url}")
+            except Exception as e:
+                logger.info(f"== Can't Write cache 2 file==   Reason is {e}")
+                Fh.remove_file(cache_file_path)
+                # traceback.print_exc()
+        else:
+            logger.info(f"===Status Code ERROR ===   Code is {response.status} " + response.url)
         return response
 
+
+# 文件按月缓存中间件
+class CacheFilePerMonthRequest(object):
+    @staticmethod
+    def get_cache_file(*args, **kwargs):
+        spider = kwargs.get("spider")
+        url = kwargs.get("url")
+        request = kwargs.get("request", {})
+        method = "get"
+        if request:
+            method = request.method
+            body = request.body.decode("utf-8")
+            # print("POST 缓存")
+        else:
+            # print("----No request")
+            pass
+        root_path_cache = kwargs.get("root_path_cache", "./")
+        spider = spider if spider else Uh.get_domain(url).replace(".", "_")
+        if method.lower() == "post":
+            return root_path_cache + spider + os.sep + get_this_month().replace("-",'_') + os.sep + Fh.get_md5_name(url + "_" + body) + ".cache"
+        else:
+            return root_path_cache + spider + os.sep + get_this_month().replace("-",'_') + os.sep + Fh.get_md5_name(url) + ".cache"
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        settings = crawler.settings
+        cls.cache_file_path_func = settings.get("FUN_CACHE_FILE_PATH", cls.get_cache_file)
+        cls.cache_file_exclude = settings.get("CACHE_FILE_EXCLUDE")
+        cls.cache_file_ts = settings.get("CACHE_FILE_TS", None)
+        cls.cache_file_exclude_ts = settings.get("CACHE_FILE_EXCLUDE_TS", cls.cache_file_ts)
+        cls.settings = settings
+        return cls()
+
+    def process_request(self, request, spider) -> process_request_type:
+        cache_file_path = self.cache_file_path_func(
+            url=str(request.url), spider=str(spider.name),
+            root_path_cache=self.settings.get("ROOT_PATH_CACHE"),
+            request=request)
+
+        # 是否应该读缓存
+        def should_read_cache(request, spider) -> bool:
+            # 存在缓存文件
+            exists_file = Fh.is_file_exit(cache_file_path)
+            # 是排除URL
+            exclude = 1 if self.cache_file_exclude and request.url.find(self.cache_file_exclude) >= 0 else 0
+            if exists_file:
+                if exclude:
+                    if self.cache_file_exclude_ts >= 0:
+                        if time.time() - Fh.get_update_ts(cache_file_path) < self.cache_file_exclude_ts:
+                            return True
+                        else:
+                            logger.debug(
+                                f"缓存文件过期。不读取。{cache_file_path}{Fh.get_update_ts(cache_file_path)}  {request.url}")
+                            return False
+                    # 排除URL无过期时间,就是排除URL都不读缓存
+                    else:
+                        logger.debug(f"排除的，没设置过期时间，全不读缓存。{request.url}")
+                        return False
+                else:
+                    # 全部时间
+                    if self.cache_file_ts:
+                        # 全部URL 没有过期
+                        if time.time() - Fh.get_update_ts(cache_file_path) < self.cache_file_ts:
+                            return True
+                        else:
+                            logger.debug(f"不是排除请求，但是缓存文件过期，不读缓存。{request.url}")
+                            return False
+                    else:
+                        return True
+            else:
+                # logger.debug(f"缓存文件不存在。 {request.url}")
+                return False
+
+        if should_read_cache(request, spider):
+            try:
+                logger.info(f"===Read cache===  {cache_file_path.split(os.sep)[-1]}   {request.url}")
+                return pickle.load(open(cache_file_path, "rb"))
+            except Exception as e:
+                logger.info(f"== Can't Read cache ===  Reason is {e}")
+                Fh.remove_file(cache_file_path)
+                traceback.print_exc()
+        else:
+            # 不读缓存
+            logger.info("===Shouldn't Read Cache===   " + request.url)
+            pass
+
+    # 写文件缓存
+    def process_response(self, request, response, spider) -> process_response_type:
+        cache_file_path = self.cache_file_path_func(
+            url=str(request.url), spider=str(spider.name),
+            root_path_cache=self.settings.get("ROOT_PATH_CACHE"),
+            request=request)
+
+        # 是否应该重写缓存
+        def should_write_cache(request, spider) -> bool:
+            exists_file = Fh.is_file_exit(cache_file_path)
+            exclude = 1 if self.cache_file_exclude and request.url.find(self.cache_file_exclude) >= 0 else 0
+            if exists_file:
+                if exclude:
+                    if self.cache_file_exclude_ts:
+                        if time.time() - Fh.get_update_ts(cache_file_path) > self.cache_file_exclude_ts:
+                            logger.debug(
+                                f"排除缓存文件过期。需要重写。{cache_file_path}{Fh.get_update_ts(cache_file_path)}  {request.url}")
+                            return True
+                        else:
+                            logger.debug(
+                                f"排除的URL没过期，不重写。过了{int(time.time() - Fh.get_update_ts(cache_file_path))} 秒？ {cache_file_path}")
+                            return False
+                    else:
+                        logger.debug(f"排除URL没设置过期时间 都要重写。 {cache_file_path}")
+                        return True
+                else:
+                    # logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
+                    return False
+            else:
+                logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
+                return True
+
+        if response.status < 300:
+            Fh.mkdir(Fh.get_file_path_and_name(cache_file_path)[0])
+            try:
+                if should_write_cache(request, spider):
+                    if hasattr(response, "certificate"):
+                        del response.certificate
+                    Fh.remove_file(cache_file_path)
+                    pickle.dump(response, open(cache_file_path, "wb"))
+                    logger.info(f"===Write cache===      {cache_file_path}   {request.url}")
+                # else:
+                #     logger.info(f"===Cache Exists===      {cache_file_path}   {request.url}")
+            except Exception as e:
+                logger.info(f"== Can't Write cache 2 file==   Reason is {e}")
+                Fh.remove_file(cache_file_path)
+                # traceback.print_exc()
+        else:
+            logger.info(f"===Status Code ERROR ===   Code is {response.status} " + response.url)
+        return response
 
 # Redis Hash缓存中间件
 class CacheRedisHashRequest(object):

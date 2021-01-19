@@ -6,6 +6,8 @@ from sqlalchemy.orm import sessionmaker
 
 from XX.Date.DatetimeHelper import get_now_time
 
+# TODO:优化一下
+
 global_conn = None
 
 

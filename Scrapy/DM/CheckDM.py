@@ -22,7 +22,7 @@ class Not200(object):
         return cls()
 
     def __init__(self):
-        self.conn_redis = RedisHelper.get_redis_connect(host=self.settings.get("REDIS_HOST"), pwd=self.settings.get("REDIS_PWD"), port=self.settings.get("REDIS_PORT"))
+        self.conn_redis = RedisHelper.get_redis_connect(host=self.settings.get("REDIS_HOST"), password=self.settings.get("REDIS_PWD"), port=self.settings.get("REDIS_PORT"))
 
     def process_response(self, request, response, spider):
         if response.status != self.settings.get("STATUS_CODE", 200):

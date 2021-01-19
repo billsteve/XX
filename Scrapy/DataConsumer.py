@@ -45,6 +45,7 @@ class Redis2Mysql(MQ2DB):
     # def customer(self, **kw):
     #     self.redis2mysql(**kw)
 
+    # TODO:
     @ah.async_call
     def redis2mysql(self, **kw):
         while 1:

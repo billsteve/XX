@@ -6,7 +6,7 @@
 # @Email        : billsteve@126.com
 import pymysql
 import requests
-from DBUtils.PooledDB import PooledDB
+from dbutils.pooled_db import PooledDB
 
 from XX.List.ListHelper import ListHelper
 
@@ -33,7 +33,7 @@ class MysqlPoolHelper:
 
     def get_lists(self, sql, values=None):
         self.cur.execute(sql, values)
-        res = ListHelper.decodeV(self.cur.fetchall())
+        res = ListHelper.decode_v(self.cur.fetchall())
         return res
 
     def exec_query(self, sql, values=None):

@@ -48,6 +48,7 @@ class AbuyunProxy(object):
         request.headers["Proxy-Authorization"] = proxyAuth
 
 
+# 固定IP代理
 class IpProxy(object):
 
     def __init__(self):

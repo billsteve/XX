@@ -7,11 +7,9 @@
 # @Software: PyCharm
 
 
-def msg(msg, *arg, **kw):
+def msg(s, *arg, **kw):
     print("---" * 60)
-    print("callback -------> {}".format(msg))
+    print("callback -------> {}".format(s))
     print("---" * 60)
 
 
-if __name__ == "__main__":
-    pass

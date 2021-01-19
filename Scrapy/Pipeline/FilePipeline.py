@@ -25,6 +25,6 @@ class FilePipeline(object):
         json_str = json.dumps(dict(item), ensure_ascii=False)
 
         # 保存数据到文件
-        file_path = FilePipeline.settings.get("ROOT_PATH_JSON") + spider.name + os.sep + ym.replace("-", os.sep) + os.sep + today + ".json"
+        file_path = self.settings.get("ROOT_PATH_JSON") + spider.name + os.sep + ym.replace("-", os.sep) + os.sep + today + ".json"
         cf.FileHelper.save_file(file_path, json_str + "\n")
         return item
