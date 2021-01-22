@@ -166,12 +166,12 @@ def make_update_sql(table: str, data: dict, replace=1) -> str:
     update_ = ''
     for k, v in data.items():
         if replace:
-            if v:
+            if v is not None:
                 update_ += f",{k.strip()}='{pymysql.converters.escape_string(str(v))}' \n "
             else:
                 update_ += f",{k.strip()}=null \n"
         else:
-            if v:
+            if v is not None:
                 update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE '{pymysql.converters.escape_string(str(v))}' END \n"
             else:
                 update_ += f",{k.strip()}=CASE WHEN {k} IS NOT NULL THEN {k} ELSE null END \n"
