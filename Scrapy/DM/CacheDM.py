@@ -85,7 +85,7 @@ class CacheFileRequest(object):
                         if time.time() - Fh.get_update_ts(cache_file_path) < self.cache_file_ts:
                             return True
                         else:
-                            logger.debug(f"不是排除请求，但是缓存文件过期，不读缓存。{request.url}")
+                            logger.debug(f"== OUT TIME，不读缓存。{request.url}")
                             return False
                     else:
                         return True
@@ -176,9 +176,9 @@ class CacheFilePerDayRequest(object):
         root_path_cache = kwargs.get("root_path_cache", "./")
         spider = spider if spider else Uh.get_domain(url).replace(".", "_")
         if method.lower() == "post":
-            return root_path_cache + spider + os.sep + get_today().replace("-",'_') + os.sep + Fh.get_md5_name(url + "_" + body) + ".cache"
+            return root_path_cache + spider + os.sep + get_today().replace("-", '_') + os.sep + Fh.get_md5_name(url + "_" + body) + ".cache"
         else:
-            return root_path_cache + spider + os.sep + get_today().replace("-",'_') + os.sep + Fh.get_md5_name(url) + ".cache"
+            return root_path_cache + spider + os.sep + get_today().replace("-", '_') + os.sep + Fh.get_md5_name(url) + ".cache"
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -222,7 +222,7 @@ class CacheFilePerDayRequest(object):
                         if time.time() - Fh.get_update_ts(cache_file_path) < self.cache_file_ts:
                             return True
                         else:
-                            logger.debug(f"不是排除请求，但是缓存文件过期，不读缓存。{request.url}")
+                            logger.debug(f"== OUT TIME，不读缓存。{request.url}")
                             return False
                     else:
                         return True
@@ -303,6 +303,7 @@ class CacheFilePerMonthRequest(object):
         url = kwargs.get("url")
         request = kwargs.get("request", {})
         method = "get"
+        body = ''
         if request:
             method = request.method
             body = request.body.decode("utf-8")
@@ -313,9 +314,9 @@ class CacheFilePerMonthRequest(object):
         root_path_cache = kwargs.get("root_path_cache", "./")
         spider = spider if spider else Uh.get_domain(url).replace(".", "_")
         if method.lower() == "post":
-            return root_path_cache + spider + os.sep + get_this_month().replace("-",'_') + os.sep + Fh.get_md5_name(url + "_" + body) + ".cache"
+            return root_path_cache + spider + os.sep + get_this_month().replace("-", '_') + os.sep + Fh.get_md5_name(url + "_" + body) + ".cache"
         else:
-            return root_path_cache + spider + os.sep + get_this_month().replace("-",'_') + os.sep + Fh.get_md5_name(url) + ".cache"
+            return root_path_cache + spider + os.sep + get_this_month().replace("-", '_') + os.sep + Fh.get_md5_name(url) + ".cache"
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -359,7 +360,7 @@ class CacheFilePerMonthRequest(object):
                         if time.time() - Fh.get_update_ts(cache_file_path) < self.cache_file_ts:
                             return True
                         else:
-                            logger.debug(f"不是排除请求，但是缓存文件过期，不读缓存。{request.url}")
+                            logger.debug(f"== OUT TIME，不读缓存。{request.url}")
                             return False
                     else:
                         return True
@@ -377,7 +378,7 @@ class CacheFilePerMonthRequest(object):
                 traceback.print_exc()
         else:
             # 不读缓存
-            logger.info("===Shouldn't Read Cache===   " + request.url)
+            # logger.info("===Shouldn't Read Cache===   " + request.url)
             pass
 
     # 写文件缓存
@@ -409,7 +410,7 @@ class CacheFilePerMonthRequest(object):
                     # logger.debug(f"不是排除的URL不重写缓存。 {cache_file_path}")
                     return False
             else:
-                logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
+                # logger.debug(f"缓存文件不存在。写缓存。 {request.url}")
                 return True
 
         if response.status < 300:
@@ -430,6 +431,7 @@ class CacheFilePerMonthRequest(object):
         else:
             logger.info(f"===Status Code ERROR ===   Code is {response.status} " + response.url)
         return response
+
 
 # Redis Hash缓存中间件
 class CacheRedisHashRequest(object):

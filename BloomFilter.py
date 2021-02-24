@@ -16,9 +16,9 @@ class SimpleHash(object):
 
 class BloomFilter(object):
 
-    def __init__(self, conn=None, blockNum=1, key='bf'):
+    def __init__(self, conn=None, block_num=1, key='bf'):
         """
-        :param blockNum: one blockNum for about 90,000,000; if you have more strings for filtering, increase it.
+        :param block_num: one block_num for about 90,000,000; if you have more strings for filtering, increase it.
         :param key: the key's name in Redis
         """
         self.redis_conn = conn
@@ -26,7 +26,7 @@ class BloomFilter(object):
         self.bit_size = 1 << 31  # Redis的String类型最大容量为512M，现使用256M
         self.seeds = [5, 7, 11, 13, 31, 37, 61]
         self.key = "B_" + key + "_"
-        self.blockNum = blockNum
+        self.block_num = block_num
         self.hash_func = []
         for seed in self.seeds:
             self.hash_func.append(SimpleHash(self.bit_size, seed))
@@ -38,7 +38,7 @@ class BloomFilter(object):
         m5.update(str_input.encode("utf-8"))
         str_input = m5.hexdigest()
         ret = True
-        name = self.key + str(int(str_input[0:2], 16) % self.blockNum)
+        name = self.key + str(int(str_input[0:2], 16) % self.block_num)
         for f in self.hash_func:
             loc = f.hash(str_input)
             ret = ret & self.redis_conn.getbit(name, loc)
@@ -50,7 +50,7 @@ class BloomFilter(object):
         m5 = md5()
         m5.update(str_input.encode("utf-8"))
         str_input = m5.hexdigest()
-        name = self.key + str(int(str_input[0:2], 16) % self.blockNum)
+        name = self.key + str(int(str_input[0:2], 16) % self.block_num)
         for f in self.hash_func:
             loc = f.hash(str_input)
             self.redis_conn.setbit(name, loc, 1)

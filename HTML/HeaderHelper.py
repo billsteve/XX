@@ -67,6 +67,10 @@ def get_header_from_line_str(headers):
             for each in headers.split('\n') if each.split()}
 
 
+def get_cookie_from_set_cookie():
+    pass
+
+
 if __name__ == '__main__':
     import time
 

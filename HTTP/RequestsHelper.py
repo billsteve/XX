@@ -18,7 +18,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class RequestHelper(object):
     @staticmethod
-    def send_request(url,*args, **kw):
+    def send_request(url, *args, **kw):
         response = ResponseObj()
         response.status_code = 0
         response.status = 0
@@ -132,7 +132,7 @@ class RequestHelper(object):
         # 存在，且不过期
         if kw.get("save_path") and os.path.isfile(kw.get("save_path")) and os.path.getsize(
                 kw.get("save_path")) and not out_time():
-            logger.debug("not out time")
+            # logger.debug("not out time")
             try:
                 if kw.get("serialization_type") == "json":
                     resp.__dict__ = dict(json.load(open(kw.get("save_path"), encoding="utf-8")))

@@ -10,7 +10,7 @@ import XX.Date.DatetimeHelper as Dt
 import XX.HTTP.RequestsHelper as Rh
 from XX.Debug import *
 
-# TODO:
+
 # 阿布云
 def get_proxy(un="H76Z3LKO67NRN5QD", pwd="272305BABB9380E1", profession=False) -> dict:
     # 代理隧道验证信息
@@ -105,7 +105,7 @@ def add_mivip_proxy(conn_redis, api=None, size=20):
         time.sleep(10)
 
 
-def get_zhima_proxy(r):
+def get_zhima_proxy(r) -> tuple:
     ips = r.keys()
     if ips:
         ip = random.choice(ips)
@@ -113,17 +113,16 @@ def get_zhima_proxy(r):
             "http": ip,
             "https": ip,
         }
-        return proxies
+        return ip, proxies
     else:
-        print("No more ip in taiyang proxy(db11)")
-        return None
+        print("No more ip in zhima proxy(db11)")
+        return None, None
 
 
-def add_zhima(r):
-    url = "http://webapi.http.zhimacangku.com/getip?num=1&type=2&pro=&city=0&yys=0&port=1&pack=15624&ts=1&ys=0&cs=0&lb=1&sb=0&pb=4&mr=1&regions="
+def add_zhima(r, proxy_size=10, url="http://webapi.http.zhimacangku.com/getip?num=1&type=2&pro=&city=0&yys=0&port=11&pack=135714&ts=1&ys=0&cs=0&lb=1&sb=0&pb=4&mr=1&regions="):
     while True:
         time.sleep(1)
-        if r.dbsize() < 2:
+        if r.dbsize() < proxy_size:
             resp = Rh.RequestHelper.send_cache_request(url)
             if resp.status == 200:
                 try:
@@ -137,16 +136,16 @@ def add_zhima(r):
                     else:
                         print(json_data)
                 except:
-                    print("not json data" + resp.text)
+                    print("Not json data" + resp.text)
                     traceback.print_exc()
             else:
                 print("proxy return error" + str(resp.text))
         else:
             print("Enough")
-            time.sleep(10)
+            time.sleep(3)
 
 
-def test_ip():
+def test_ip(r):
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate",
@@ -156,7 +155,7 @@ def test_ip():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.5005.400 QQBrowser/10.0.923.400"
     }
     while 1:
-        proxy = get_random_proxy()
+        proxy = get_random_proxy(r)
         if proxy:
             urls = list()
             urls.append("https://www.baidu.com")
@@ -171,10 +170,10 @@ def test_ip():
                 except:
                     print("time out" + url)
         else:
-            p(" wrong proxy", line="-----")
+            p(" Wrong proxy", line="-----")
 
 
-def get_proxy_by_ip(ip, port):
+def get_proxy_by_ip(ip, port=80):
     proxies = {
         "http": f"{ip}:{port}",
         "https": f"{ip}:{port}",
@@ -185,5 +184,6 @@ def get_proxy_by_ip(ip, port):
 get_abuyun_proxy = get_proxy
 
 if __name__ == '__main__':
-    r = requests.get("https://www.baidu.com", proxies=get_abuyun_proxy("H4FJM3WZYGEP79ND", "6D8897ED95103EBC"))
-    print(r.status_code)
+    # 阿布云测试
+    req = requests.get("https://www.baidu.com", proxies=get_abuyun_proxy("H4FJM3WZYGEP79ND", "6D8897ED95103EBC"))
+    print(req.status_code)

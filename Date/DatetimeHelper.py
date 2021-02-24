@@ -23,38 +23,38 @@ def get_add_date_ts(month=0, day=1, start_ts=None):
 
 
 # 字符串转时间戳
-def str_to_ts(str1):
-    return int(time.mktime(time.strptime(str1, '%Y-%m-%d %H:%M:%S')))
+def str_to_ts(str1, fmt='%Y-%m-%d %H:%M:%S'):
+    return int(time.mktime(time.strptime(str1, fmt)))
 
 
 # 时间戳转换为日期
-def ts_to_date(ts=time.time()):
-    return time.strftime('%Y-%m-%d', time.localtime(ts))
+def ts_to_date(ts=time.time(), fmt='%Y-%m-%d'):
+    return time.strftime(fmt, time.localtime(ts))
 
 
 # 时间戳转换为日期
-def ts_to_datetime(ts=time.time()):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ts))
+def ts_to_datetime(ts=time.time(), fmt='%Y-%m-%d %H:%M:%S'):
+    return time.strftime(fmt, time.localtime(ts))
 
 
 # 时间戳转换为时间
-def ts_to_time(ts=time.time()):
-    return time.strftime('%H:%M:%S', time.localtime(ts))
+def ts_to_time(ts=time.time(), fmt='%H:%M:%S'):
+    return time.strftime(fmt, time.localtime(ts))
 
 
 # 获取现在的时间
-def get_now_time(ts=time.time()):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ts))
+def get_now_time(ts=time.time(), fmt='%Y-%m-%d %H:%M:%S'):
+    return time.strftime(fmt, time.localtime(ts))
 
 
 # 获取今天的日期
-def get_today(ts=time.time()):
-    return time.strftime('%Y-%m-%d', time.localtime(ts))
+def get_today(ts=time.time(), fmt='%Y-%m-%d'):
+    return time.strftime(fmt, time.localtime(ts))
 
 
 # 获取今天的月份
-def get_this_month(ts=time.time()):
-    return time.strftime('%Y-%m', time.localtime(ts))
+def get_this_month(ts=time.time(), fmt='%Y-%m'):
+    return time.strftime(fmt, time.localtime(ts))
 
 
 # 获取当前小时

@@ -4,6 +4,8 @@ import base64
 import random
 
 from logzero import logger
+from scrapy.downloadermiddlewares.httpproxy import HttpProxyMiddleware
+from w3lib.http import basic_auth_header
 
 import XX.DB.RedisHelper as Rh
 
@@ -94,3 +96,51 @@ class MimvpProxy(object):
             logger.info("Proxy is " + str(request.meta["proxy"]))
         else:
             logger.info("No Proxy ip")
+
+
+# 快代理
+class KuaiProxyDM:
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        cls.settings = crawler.settings
+        return cls()
+
+    def process_request(self, request, spider):
+        request.meta['proxy'] = "http://%(proxy)s" % {'proxy': self.settings.get("PROXY_URL")}
+        # 用户名密码认证 # 白名单认证可注释下一行
+        request.headers['Proxy-Authorization'] = basic_auth_header(self.settings.get("PROXY_UN"), self.settings.get("PROXY_PWD"))
+        # 这里是为了强制切换IP，因为隧道模式的IP有可能还能用
+        request.headers["Connection"] = "close"
+        return None
+
+
+class Data5U(HttpProxyMiddleware):
+
+    # 初始化
+    def __init__(self, ip=''):
+        super().__init__()
+        self.ip = ip
+
+    # 请求处理
+    def process_request(self, request, spider):
+        # 先随机选择一个IP
+        IPPOOL = []
+        thisip = random.choice(IPPOOL)
+        print("当前使用IP是：" + thisip)
+        request.meta["proxy"] = "http://" + thisip
+
+
+class ProxyMiddleware(object):
+    # scrapy暂不推荐使用，暂不提供技术支持
+
+    # 代理服务器
+
+    # appkey为你订单的key
+
+    def process_request(self, request, spider):
+        proxyServer = "transfer.moguproxy.com:9001"
+        proxyAuth = "Basic " + ""
+        request.meta["proxy"] = proxyServer
+
+        request.headers["Authorization"] = proxyAuth
