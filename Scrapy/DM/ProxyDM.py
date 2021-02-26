@@ -11,7 +11,7 @@ import XX.DB.RedisHelper as Rh
 
 
 # redisIP池代理
-class IPPollingProxy(object):
+class IPPollingProxy:
     # ping from all province, then get cdn ip
     proxy_cdn = []
 
@@ -34,7 +34,7 @@ class IPPollingProxy(object):
 
 
 # 阿布云代理
-class AbuyunProxy(object):
+class AbuyunProxy:
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -51,7 +51,7 @@ class AbuyunProxy(object):
 
 
 # 固定IP代理
-class IpProxy(object):
+class IpProxy:
 
     def __init__(self):
         # 获取Redis连接
@@ -65,7 +65,7 @@ class IpProxy(object):
 
 
 # Goubanjia代理
-class Goubanjia(object):
+class GoubanjiaProxy:
 
     def __init__(self):
         # 获取Redis连接
@@ -78,7 +78,7 @@ class Goubanjia(object):
         request.meta["proxy"] = ip
 
 
-class MimvpProxy(object):
+class MimvpProxy:
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -99,7 +99,7 @@ class MimvpProxy(object):
 
 
 # 快代理
-class KuaiProxyDM:
+class KuaiProxy:
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -131,7 +131,7 @@ class Data5U(HttpProxyMiddleware):
         request.meta["proxy"] = "http://" + thisip
 
 
-class ProxyMiddleware(object):
+class ProxyMiddleware:
     # scrapy暂不推荐使用，暂不提供技术支持
 
     # 代理服务器
