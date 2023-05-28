@@ -20,7 +20,7 @@ class CommonHelper():
     @staticmethod
     def remove_cache_file(url, spider, root_path_cache, sc):
         url = CommonHelper.uniqueUrl(url)
-        uf.FileHelper.remove_file(root_path_cache + spider + sc + uf.FileHelper.get_md_5_name(url) + ".cache")
+        uf.FileHelper.remove_file(root_path_cache + spider + sc + uf.FileHelper.get_md5_name(url) + ".cache")
 
     # 获取所有的spider名字
     @staticmethod

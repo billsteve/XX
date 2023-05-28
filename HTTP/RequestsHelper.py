@@ -5,7 +5,6 @@ import traceback
 
 import requests
 from logzero import logger
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 import XX.Encrypt.EncryptHelper as Enc
 import XX.String.StringHelper as String
@@ -13,12 +12,23 @@ from XX.File.FileHelper import *
 from XX.File.FileHelper import FileHelper as Fh
 from XX.Model.Object.ResponseObj import *
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+requests.packages.urllib3.disable_warnings()
 
 
 class RequestHelper(object):
+
     @staticmethod
-    def send_request(url, *args, **kw):
+    def send_request(url, *args, **kw) -> ResponseObj:
+        """
+        基础发送请求
+        Args:
+            url: url地址
+            *args:
+            **kw:
+
+        Returns:
+            response
+        """
         response = ResponseObj()
         response.status_code = 0
         response.status = 0
@@ -80,11 +90,21 @@ class RequestHelper(object):
 
     # 删除缓存，重新请求
     @staticmethod
-    def send_refresh_cache_request(url, *arg, **kw):
+    def send_refresh_cache_request(url, *arg, **kw) -> ResponseObj:
+        """
+        强制请求并删除缓存。
+        Args:
+            url:
+            *arg:
+            **kw:
+
+        Returns:
+
+        """
         # 写缓存
         if kw.get("save_path"):
             FileHelper.remove_file(kw.get("save_path"))
-            # logger.debug("Delete old cache file ")
+            logger.debug(f"Delete old cache file : {kw.get('save_path')} ")
         resp = RequestHelper.send_request(url, *arg, **kw)
         if resp.status_code < 300:
             try:
@@ -143,7 +163,8 @@ class RequestHelper(object):
                         resp = pickle.load(open(kw.get("save_path"), "rb"))
                         resp.cache = 2
                         resp.cache_file = kw.get("save_path")
-                        if not resp.text:
+                        if not resp.text or resp.status_code != 200:
+                            logger.warning("response 没有内容，重新请求。")
                             return RequestHelper.send_refresh_cache_request(url, *arg, **kw)
                     except Exception as e:
                         traceback.print_exc()
@@ -169,25 +190,31 @@ class RequestHelper(object):
         return grequests.map(tasks, size=pool_size, exception_handler=err_callback)
 
     @staticmethod
-    def try_request_url(url, *arg, **kw):
-        try_time_level = kw["try_time_level"] if "try_time_level" in kw.keys() else 5
+    def try_request_url(url, *arg, **kw) -> ResponseObj:
+        """
+        可重试的请求。 TODO,使用try注解
+        Args:
+            url:
+            *arg:
+            **kw:
+
+        Returns:
+
+        """
+        try_times_threshold = kw["try_times_threshold"] if "try_times_threshold" in kw.keys() else 5
         try_times = kw["try_times"] if "try_times" in kw.keys() else 0
         try_ts = kw["try_ts"] if "try_ts" in kw.keys() else 0.01
         kw["try_times"] = try_times
         time.sleep(try_times * try_ts)
         response = RequestHelper.send_cache_request(url, *arg, **kw)
-        if response:
-            if 400 <= response.status_code <= 600:
-                kw["try_times"] += 1
-                logger.debug(" =" + str(response.status_code) + "= ")
-                if try_time_level and kw["try_times"] >= try_time_level:
-                    return response
-                RequestHelper.try_request_url(url, *arg, **kw)
-            else:
+        if 400 <= response.status_code <= 600:
+            kw["try_times"] += 1
+            logger.debug(" =" + str(response.status_code) + "= ")
+            if try_times_threshold and kw["try_times"] >= try_times_threshold:
                 return response
+            RequestHelper.try_request_url(url, *arg, **kw)
         else:
-            logger.debug("No response")
-            return None
+            return response
         return response
 
     @staticmethod
