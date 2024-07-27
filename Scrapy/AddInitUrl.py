@@ -9,12 +9,13 @@ import importlib
 import json
 import time
 
-import XX.DB.RedisHelper as ur
-import XX.DB.SqlAlchemyHelper as sa
+from logzero import logger
+
 import XX.BloomFilter as BloomFilter
 import XX.BuiltinFunctions as BF
-from XX.DB.RedisHelper import *
-from logzero import logger
+import XX.DB.RedisHelper as ur
+import XX.DB.SqlAlchemyHelper as sa
+from XX.DB.RedisHelper import RedisHelper
 
 
 # 添加入口url

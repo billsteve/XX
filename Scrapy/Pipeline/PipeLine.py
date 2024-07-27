@@ -6,11 +6,11 @@ import time
 from logzero import logger
 from thrift.transport import TSocket
 
+import XX.BuiltinFunctions as bf
 import XX.DB.SqlAlchemyHelper as sa
 import XX.Encrypt.EncryptHelper as enc
 import XX.File.FileHelper as cf
 import XX.HTML.HtmlHelper as chtml
-import XX.BuiltinFunctions as bf
 
 
 # File pipeline:放到今日文件中
