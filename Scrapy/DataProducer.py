@@ -8,7 +8,7 @@ import XX.DB.RedisHelper as dr
 import XX.Date.DatetimeHelper as dt
 import XX.Encrypt.EncryptHelper as enc
 import XX.File.FileHelper as uf
-import XX.Tools.BuiltinFunctions as bf
+import XX.BuiltinFunctions as bf
 from logzero import logger
 from thrift.transport import TSocket
 

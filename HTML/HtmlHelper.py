@@ -15,7 +15,16 @@ def url_encode(k):
 
 # 给不能dump的字段，改为能dump
 def parse_dict(item):
+    if isinstance(item, str):
+        return item
+    if isinstance(item, list):
+        l = []
+        for i in item:
+            l.append(parse_dict(i))
+        return l
     for k in item:
+        print(item)
+        print(k)
         if isinstance(item[k], str):
             pass
         elif isinstance(item[k], dict):
@@ -145,4 +154,7 @@ def tff2_unicode():  # 将字体映射为unicode列表
 
 
 if __name__ == '__main__':
-    pass
+    d = {'url': 'https://tool.chinaz.com:443/subdomain?domain=tencent.com&page=1',
+         'sub_urls': ['tencent.com', 'cloud.tencent.com', 'meeting.tencent.com', 'www.tencent.com', 'intl.cloud.tencent.com']}
+    r = parse_dict(d)
+    print(r)

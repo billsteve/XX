@@ -13,7 +13,7 @@ import json
 import os
 import sys
 
-import XX.Tools.Debug as d
+import XX.Debug as d
 from XX.DB.RedisHelper import *
 from scrapy import cmdline
 from scrapy_redis.spiders import RedisSpider
