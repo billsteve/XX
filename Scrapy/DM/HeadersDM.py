@@ -38,7 +38,6 @@ class RandomUserAgentMobile(object):
 class RandomUserAgentWechat(object):
     userAgents = {
         'weixin': [
-            # weixin pc for windows
             'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36 MicroMessenger/6.5.2.501 NetType/WIFI WindowsWechat'
         ]
     }
@@ -75,19 +74,13 @@ class HeaderAcceptHtml(object):
 
 
 class AutoHomeHeader(object):
-    headers = {
-        "accept": "application/json, text/javascript, */*; q=0.01",
-        "accept-encoding": "gzip, deflate, br",
-        "accept-language": "zh-CN,zh;q=0.9",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.6726.400 QQBrowser/10.2.2265.400",
-        "x-requested-with": "XMLHttpRequest"
-    }
 
     def process_request(self, request, spider):
-        request.headers.setdefault('User-Agent', self.headers["User-Agent"])
+        request.headers.setdefault('User-Agent',
+                                   "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.26 Safari/537.36 Core/1.63.6726.400 QQBrowser/10.2.2265.400")
 
 
 class AcceptEncodingUTF8(object):
 
     def process_request(self, request, spider):
-        request.headers.setdefault('Accept-Encoding', "utf-8")
+        request.headers['Accept-Encoding'] = "utf-8"
