@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Time     : 2018/11/27 13:50
 # @Author   : Bill
-# @Email      : billsteve@126.com
-# @Des       : MySQL数据库连接配置对象
-# @File        : Mysql
+# @Email    : billsteve@126.com
+# @Des      : MySQL数据库连接配置对象
+# @File     : Mysql
 # @Software: PyCharm
 import functools
 

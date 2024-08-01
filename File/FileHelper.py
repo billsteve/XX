@@ -6,7 +6,7 @@ import time
 import XX.Encrypt.EncryptHelper as cenc
 
 
-def addLineN(key): return key + "\n" if key else key
+def add_line_n(key): return key + "\n" if key else key
 
 
 # 文件帮助类
@@ -65,8 +65,8 @@ class FileHelper(object):
         file_path = file_path.strip()
         file_path = file_path.rstrip("\\")
         file_path = file_path.rstrip("/")
-        isExists = os.path.exists(file_path)
-        if isExists:
+        is_exists = os.path.exists(file_path)
+        if is_exists:
             shutil.rmtree(file_path)
         return True
 
@@ -170,16 +170,3 @@ class FileHelper(object):
             os.rename(fp, new_name)
         else:
             raise FileNotFoundError
-
-
-if __name__ == "__main__":
-    pass
-    # print(FileHelper.getFileName("E:\\t82.html"))
-    # print(FileHelper.getFileExt("E:\\t82.html"))
-
-    # FileHelper.saveFile("E:\\ele\\ele\\111.log", "12121")
-    # print(FileHelper.getMd5Name("1"))
-
-    r = FileHelper.remove_file("C:\\Users\\billsteve\\Desktop\\tmp\\1.log")
-    print(r)
-    # print(FileHelper.getUpdateTs("d:\\1.html"))

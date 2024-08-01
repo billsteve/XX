@@ -85,3 +85,9 @@ class AutoHomeHeader(object):
 
     def process_request(self, request, spider):
         request.headers.setdefault('User-Agent', self.headers["User-Agent"])
+
+
+class AcceptEncodingUTF8(object):
+
+    def process_request(self, request, spider):
+        request.headers.setdefault('Accept-Encoding', "utf-8")

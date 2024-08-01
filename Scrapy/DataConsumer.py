@@ -75,7 +75,6 @@ def redis2mysql(**kw):
         json_str = conn_redis.rpop(spider + ":items")
         if kw.get("debug"):
             # 放回
-            print("+++>>> Readd=====")
             conn_redis.lpush(spider + ":items", json_str)
         if json_str:
             json_data = json.loads(json_str, encoding="utf-8")

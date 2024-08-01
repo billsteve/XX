@@ -12,9 +12,9 @@ from sqlalchemy.orm import sessionmaker
 class SqlAlchemyHelper():
 
     @staticmethod
-    def get_session(host="localhost", user="root", pwd="root", port=3306, charset="utf-8", db="test", *arg, **kw):
+    def get_session(host="localhost", user="root", password="root", port=3306, charset="utf-8", db="test", *arg, **kw):
         driver = kw.get("driver", "pymysql")
-        mysql_url = 'mysql+' + driver + '://' + user + ":" + pwd + "@" + host + ":" + str(port) + "/" + str(db) + "?charset=" + charset.replace("-", "")
+        mysql_url = 'mysql+' + driver + '://' + user + ":" + password + "@" + host + ":" + str(port) + "/" + str(db) + "?charset=" + charset.replace("-", "")
         engine = create_engine(mysql_url, encoding=charset, pool_size=10, max_overflow=20, *arg, **kw)
         return sessionmaker(bind=engine)()
 
